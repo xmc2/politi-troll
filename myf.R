@@ -1,0 +1,3 @@
+myf <- function(...){
+        paste(...)
+}
