@@ -5,10 +5,26 @@ date: "September 7, 2016"
 output: html_document
 ---
 
+require(twitteR)
+
+setup_twitter_oauth("ODkKP1rA44Iv8zidrvk3K3uZu", "gvb0Q6J6XS1gHdDNWoxnpRccxLfXwsXptBHkDxVMXe71y5fsb7", access_token=NULL, access_secret=NULL)
 
 
-```{r, echo=FALSE}
-plot(cars, main="Cars", pch=19)
-```
+rdmTweets <- searchTwitter('#test', n=500)
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+df <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+
+summary(df)
+
+head(df)
+
+df[1,]
+?searchTwitter
+# Note that the Twitter search API only goes back 1500 tweets (I think?)
+ 
+#Create a dataframe based around the results
+df <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+#Here are the columns
+names(df)
+#And some example content
+head(df,3)
