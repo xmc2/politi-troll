@@ -1,3 +1,9 @@
+---
+title: "Data Sci"
+author: "Matt Cole"
+date: "September 13, 2016"
+output: html_document
+---
 require(twitteR)
 
 tweets <- searchTwitter('#test', n=500)
