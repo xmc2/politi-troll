@@ -1,0 +1,31 @@
+Thoughts, 
+
+* What is an internet troll
+Wikipedia: a person who sows discord on the Internet by starting arguments or upsetting people, by posting inflammatory, extraneous, or off-topic messages in an online community (such as a newsgroup, forum, chat room, or blog) with the deliberate intent of provoking readers into an emotional response or of otherwise disrupting normal on-topic discussion, often for their own amusement.
+
+
+inflammatory: arousing or [intended to arouse angry or violent feelings].
+extraneous: [irrelevant or unrelated to the subject being dealt with].
+off-topic: [not relevant to the subject in question].
+
+Within political context, things could be ...
+
+Idea: 
+classify individual tweets (troll or not troll), then classify users based on the tweets and other attributes?
+classify users with respect to all at once
+
+* possible things to look at,
+
+Twitter picture
+        is there one?
+        contents
+        background picture
+Followers
+        quantity
+        quality
+Following
+        ^
+favorites
+tweets
+        quantity
+        urls - what websites do they lead to?
