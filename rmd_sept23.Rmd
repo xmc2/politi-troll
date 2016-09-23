@@ -1,0 +1,16 @@
+---
+title: "Data Sci sept 23"
+author: "Matt Cole"
+date: "September 23, 2016"
+output: html_document
+---
+
+```{r}
+require(twitteR); require(dplyr)
+source("hidden.R")
+source("gettingdata.R")
+```
+
+```{r}
+head(fulldata)
+```
