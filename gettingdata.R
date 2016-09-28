@@ -1,7 +1,6 @@
 require(twitteR); require(dplyr)
 source("hidden.R")
 system('bash set_dir.sh')
-getwd()
 
 # lets look for tweets at hillary clinton
 sample_size = 100
