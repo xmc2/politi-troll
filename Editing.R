@@ -32,6 +32,7 @@ for (i in 1:10){ # this is terrible for readability ....
 
 colnames(db)
 str_count(tolower(db[,]$text1), "clinton")
+write.csv(for_lab, "process.csv")
 
 iconv(db[,]$text1, from="UTF-8", to="latin1")
 
