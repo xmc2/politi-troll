@@ -3,7 +3,7 @@ source("hidden.R")
 system('bash set_dir.sh')
 
 # lets look for tweets at hillary clinton
-sample_size = 100
+sample_size = 150
 tweets <- searchTwitter('@hillaryclinton', n=sample_size); tweets_time <- Sys.time()
 
 # lets generate a list (vector) of all of the observed users
@@ -17,22 +17,22 @@ user_names <- as.vector(user_names)
 # lets get info from these users 
 sample_users <- lookupUsers(user_names)
 sample_users_df <- twListToDF(sample_users)
-sample_users_df$screenName
+# sample_users_df$screenName # looking at screenNames
 # save (write to csv)
 write.csv(sample_users_df, "outputs/users.csv")
 
 
 # lets make a data frame of the tweets we got
 tweets_df <- twListToDF(tweets)
-head(tweets_df)
-colnames(tweets_df)
+#head(tweets_df)
+#colnames(tweets_df)
 #export this
 write.csv(tweets_df, "outputs/tweets.csv")
 
 # making a list of all users and one tweet (not particularly usefull)
 tester <- full_join(sample_users_df, tweets_df, by='screenName')
 tester <- select(tester, -id.y, -id.x)
-colnames(tester)
+#colnames(tester)
 
 #####
 #####
@@ -56,7 +56,7 @@ reduce_tweet <- function(x){
 list_dim <- data.frame()
 tweet_count <- 20
 for (i in 1:length(user_names)){ 
-        w <- userTimeline(user_names[i],n=tweet_count)
+        w <- userTimeline(user_names[i],n=tweet_count, includeRts=TRUE)
         if (identical(w, list()) == FALSE){
                 tempor <- twListToDF(w) # this is a new line... 
                 tempor <- normalize(tempor)
@@ -79,9 +79,12 @@ for (i in 1:tweetno){
                 #tweet_observations <- reduce_tweet(tweet_observations)
 
                 add_me <- tweet_observations[to_add,]
-                colnames(add_me) <- ifelse(colnames(add_me) == "screenName",
-                        colnames(add_me), paste(colnames(add_me),i,sep=""))
-                db <- full_join(sample_users_df, tweet_observations[to_add,], by='screenName')
+                colnames(add_me) <- ifelse(colnames(tweet_observations) == "screenName", # TEST
+                          colnames(tweet_observations), paste(colnames(tweet_observations),i,sep=""))# TEST
+                
+#                 colnames(add_me) <- ifelse(colnames(add_me) == "screenName",# PRESERVED
+#                         colnames(add_me), paste(colnames(add_me),i,sep="")) # PRESERVED
+                db <- full_join(sample_users_df, add_me, by='screenName') #changing tweet_observations[to_add,] to add_me
         } else {
                 # removing those observations already added
                 tweet_observations <- tweet_observations[-to_add,]
@@ -96,9 +99,9 @@ for (i in 1:tweetno){
                 db <- full_join(db, add_me, by='screenName')
         }
 }
-colnames(db)
+# colnames(db)
+bu <- db
 write.csv(db, "outputs/db.csv")
-
 
 
 paste("Data was generated from twitter on", tweets_time)
