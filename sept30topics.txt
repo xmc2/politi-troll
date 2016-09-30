@@ -1,0 +1,7 @@
+Points for discussion:
+tweets v retweets
+classification
+data collection
+        sources
+        times etc.
+bash scripts (windows)
