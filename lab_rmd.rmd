@@ -16,6 +16,6 @@ Data was collected from twitter using the twitter API using () sampling strategy
 library(readr)
 twitter_data <- read_csv('for_lab.csv')
 head(twitter_data)
-colnames(twitter_data[,1:34])
+colnames(twitter_data)
 ```
 
