@@ -7,3 +7,4 @@ hidden.R
 .Rhistroy
 db.csv
 .csv
+*.csv
