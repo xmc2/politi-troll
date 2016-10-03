@@ -4,4 +4,9 @@ classification
 data collection
         sources
         times etc.
-bash scripts (windows)
+bash scripts (windows)?
+
+
+rmd contains all text etc. 
+data collection must be explained
+all other analysis must be able to be sourced. 
