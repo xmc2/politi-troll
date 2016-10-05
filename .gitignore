@@ -9,3 +9,4 @@ db.csv
 .csv
 *.csv
 *.html
+*.Rhistory

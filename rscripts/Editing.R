@@ -5,7 +5,7 @@ library(dplyr)
 # source("gettingdata.R")
 #### or we can collect what we have already produced
 db <- read_csv('outputs/db.csv')
-badwords<-as.vector(paste(readLines("badwords.txt")))
+badwords <- as.vector(paste(readLines("badwords.txt")))
 
 db1 <- db
 x <- vector()

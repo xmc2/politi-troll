@@ -1,6 +1,6 @@
 require(twitteR); require(dplyr)
-source("hidden.R")
-system('bash set_dir.sh')
+source("rscripts/hidden.R")
+
 
 # lets look for tweets at hillary clinton
 sample_size = 150
@@ -19,20 +19,22 @@ sample_users <- lookupUsers(user_names)
 sample_users_df <- twListToDF(sample_users)
 # sample_users_df$screenName # looking at screenNames
 # save (write to csv)
-write.csv(sample_users_df, "outputs/users.csv")
+
+# Overwrite below
+#write.csv(sample_users_df, "outputs/users.csv")
 
 
 # lets make a data frame of the tweets we got
 tweets_df <- twListToDF(tweets)
 #head(tweets_df)
 #colnames(tweets_df)
-#export this
-write.csv(tweets_df, "outputs/tweets.csv")
+
+# OVERWRITE BELOW
+#write.csv(tweets_df, "outputs/tweets.csv")
 
 # making a list of all users and one tweet (not particularly usefull)
 tester <- full_join(sample_users_df, tweets_df, by='screenName')
 tester <- select(tester, -id.y, -id.x)
-#colnames(tester)
 
 #####
 #####
@@ -99,10 +101,38 @@ for (i in 1:tweetno){
                 db <- full_join(db, add_me, by='screenName')
         }
 }
-# colnames(db)
-bu <- db
-write.csv(db, "outputs/db.csv")
 
+# OVERWRITE BELOW
+# write.csv(db, "outputs/db.csv")
+
+# clean it up, daddy.
+
+
+rm(add_me, db, list_dim, sample_users, tempor, tester, tweet_observations, tweets_df,
+   i, sample_users_df, to_add, tweets, user_names, w)
 
 paste("Data was generated from twitter on", tweets_time)
+
+##### getting data from Kraggle...
+
+kraggle = read_csv("data/train.csv"); nrow(kraggle)
+kraggle = kraggle[nchar(kraggle$Comment) <= 160, ]; nrow(kraggle)
+
+
+#####
+##### Hand harvested trolls
+#####
+#####
+#####
+#####
+
+existing_trolls <- select(read.csv("outputs/selected_trolls.csv"), -X)
+
+user_names <- c("JrTrosclair")
+
+x <- trolls(user_names)
+updated_troll <- rbind(x, existing_trolls)
+colnames(x) == colnames(existing_trolls)
+
+# write.csv(updated_troll, "outputs/selected_trolls.csv")
 
