@@ -49,7 +49,7 @@ get_those_tweets_meow <- function(sample_size = 150, term = '@hillaryclinton'){
         print("Collecting Tweets...")
         
         list_dim <- data.frame()
-        tweet_count <- 20
+        tweet_count <- 10
         for (i in 1:length(user_names)){ 
                 w <- userTimeline(user_names[i],n=tweet_count, includeRts=TRUE)
                 if (identical(w, list()) == FALSE){
@@ -66,7 +66,7 @@ get_those_tweets_meow <- function(sample_size = 150, term = '@hillaryclinton'){
         
         print("Making those tweets pretty")
         
-        for (i in 1:tweetno){
+        for (i in 1:tweet_count){
                 if (i == 1){
                         to_add <- match(unique(tweet_observations$screenName), tweet_observations$screenName)
                         #tweet_observations <- reduce_tweet(tweet_observations)

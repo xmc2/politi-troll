@@ -1,0 +1,15 @@
+trolls... 
+
+user_names <- c("chrismar822", "debnam_lee", "GielauA","jenifercolins",
++ "janegarcia92", "normaturner912", "shadowjago101", "insertName49",
++ "katecove11", "whoshvnter", "alexrcarson", "MorganLsneed", "1mykfed")
+> x <- trolls(user_names)
+
+"Robertgreiner71", "analiensaturn", "katecove11", "MushroomThrowad", 
+          "offensive_jake", "Dlhg35G", "545_6589", "patrioticpepe", "NeilTurner_")
+          
+          
+TO ADD :
+
+more <- c("Robertgreiner71", "analiensaturn", "katecove11", "MushroomThrowad",
+          "offensive_jake", "Dlhg35G", "545_6589", "patrioticpepe", "NeilTurner_")
