@@ -1,4 +1,4 @@
-require(twitteR); require(dplyr); require(tidytext)
+require(twitteR); require(dplyr); require(tidytext); require(readr)
 source("rscripts/hidden.R")
 source("rscripts/get_tweets_now_func.R")
 source("rscripts/selected_trolls.R")
@@ -8,10 +8,10 @@ source("rscripts/selected_trolls.R")
 hrc_tweets <- get_those_tweets_meow(sample_size = 150, term = '@hillaryclinton'); hrc_time <- Sys.time()
 djt_tweets <- get_those_tweets_meow(sample_size = 150, term = '@donaldtrump'); djt_time <- Sys.time()
 data <- dplyr::bind_rows(hrc_tweets, djt_tweets)
-write.csv(data, "outputs/data2.csv")
+#write.csv(data, "outputs/data2.csv")
 x <- read.csv("outputs/data2.csv")
 x <- x %>% select(screenName, text1, text2, text3, text4, text5, text6, text7, text8, text9, text10)
-write.csv(x, "outputs/classifyme.csv")
+#write.csv(x, "outputs/classifyme1.csv")
 rm(x)
 # END
 
@@ -21,6 +21,7 @@ rm(x)
 #####
 #####
 #####
+
 #####
 
 existing_trolls <- select(read.csv("outputs/selected_trolls.csv"), -X)
@@ -31,10 +32,10 @@ x <- trolls(user_names)
 x$created <- as.character(x$created)
 updated_troll <-  rbind(x, existing_trolls)
 
-write.csv(updated_troll, "outputs/selected_trolls.csv")
+#write.csv(updated_troll, "outputs/selected_trolls.csv")
 classify2 <- updated_troll %>% 
         select(screenName, text1, text2, text3, text4, text5, text6, text7, text8, text9, text10) 
-write.csv(classify2, "outputs/classify2.csv")
+#write.csv(classify2, "outputs/classify2.csv")
 
 
 #####
@@ -45,7 +46,7 @@ write.csv(classify2, "outputs/classify2.csv")
 #####
 
 # hand classify by hand
-round1 <- read.csv("outputs/classifyme.csv") %>%
+round1 <- read.csv("outputs/classifyme1.csv") %>%
         select(-X, -X.1) %>%
         select(screenName, Troll)
 round2 <- read.csv("outputs/to_classify.csv") %>%
@@ -55,5 +56,25 @@ round3 <- read.csv("outputs/classify_3.csv") %>%
         select(-X) %>%
         select(screenName, Troll)
 classified <- rbind(round1, round2) %>% rbind(round3)
+#write.csv(classified, "outputs/classified.csv")
+
+#### MERGING TROLL INFO WITH FULL DATA
+
+# part 1 read in classified information
+classified <- read_csv("outputs/classified.csv") %>%
+        select(-X1)
+
+# part 2 read in data
+db <- read_csv("outputs/db.csv") %>% select(-X1)
+db2 <- read_csv("outputs/data2.csv") %>% select(-X1)
+db3 <- read_csv("outputs/selected_trolls.csv") %>% select(-X1)
+
+db <- rbind(db, db2) %>% rbind(db3)
+nrow(db)
+nrow(classified)
+
+data <- dplyr::inner_join(db, classified, by = "screenName") 
+data <- data[!duplicated(data$screenName), ]
+write_csv(data, "data/data.csv")
 
 

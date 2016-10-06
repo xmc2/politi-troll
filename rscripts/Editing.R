@@ -1,10 +1,28 @@
-library(readr)
-library(stringr)
-library(dplyr)
+library(readr); library(stringr); library(dplyr); library(tidytext)
 #### to obtain data we can either re generate
 # source("gettingdata.R")
 #### or we can collect what we have already produced
-db <- read_csv('outputs/db.csv')
+data <- read_csv('data/data.csv')
+
+tweet1_words <- data %>% select(text1, screenName) %>%
+        group_by(screenName) %>%
+        unnest_tokens(word, text1) %>%
+        filter(!word %in% stop_words$word, str_detect(word, "^[a-z']+$"))
+
+AFINN <- sentiments %>%
+        filter(lexicon == "AFINN") %>%
+        select(word, afinn_score = score)
+
+tweet1_sentiment <- tweet1_words %>%
+        inner_join(AFINN, by = "word") %>%
+        group_by(screenName) %>%
+        summarize(sentiment = mean(afinn_score))
+
+
+
+
+######### BELOW IS V TERRIBLE #####
+
 badwords <- as.vector(paste(readLines("badwords.txt")))
 
 db1 <- db
