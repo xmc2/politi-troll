@@ -26,16 +26,33 @@ source("rscripts/selected_trolls.R")
 # 
 # existing_trolls <- select(read.csv("outputs/selected_trolls.csv"), -X)
 # 
-# user_names <- c()
-# 
-# x <- trolls(user_names)
-# x$created <- as.character(x$created)
-# updated_troll <-  rbind(x, existing_trolls)
-# 
-# #write.csv(updated_troll, "outputs/selected_trolls.csv")
-# classify2 <- updated_troll %>% 
-#         select(screenName, text1, text2, text3, text4, text5, text6, text7, text8, text9, text10) 
-# #write.csv(classify2, "outputs/classify2.csv")
+user_names <- c("jd_Constitution", "DeplorableChri1", "fulmen56", "EthanStew", "Trillvybe",
+                "BishopDawsom", "ElizabethDaQuee", "Tjsweetsong")
+
+x <- trolls(user_names)
+x$created <- as.character(x$created)
+updated_troll <-  rbind(x, existing_trolls)
+
+write.csv(x, "outputs/selected_trolls10_7.csv")
+classify10_7 <- x %>% 
+        select(screenName, text1, text2, text3, text4, text5, text6, text7, text8, text9, text10) 
+write.csv(classify10_7, "outputs/classify10_7.csv")
+
+# then classify
+
+# off script
+
+# then 
+
+#read existing data
+data <- read_csv('data/data.csv')
+#import classification
+
+tclas <- read_csv("outputs/classify10_7.csv") %>%
+        select(screenName, troll) %>% 
+        dplyr::inner_join(x,by="screenName") %>%
+        rbind(data)
+write_csv(tclas, "outputs/data1.csv")
 
 
 #####
