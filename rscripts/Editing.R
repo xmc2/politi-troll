@@ -4,7 +4,9 @@ library(readr); library(stringr); library(dplyr); library(tidytext)
 #### or we can collect what we have already produced
 data <- read_csv('data/data.csv')
 
-tweet1_words <- data %>% select(text1, screenName) %>%
+
+
+tweet_words <- data %>% select(screenName, text1, text2) %>%
         group_by(screenName) %>%
         unnest_tokens(word, text1) %>%
         filter(!word %in% stop_words$word, str_detect(word, "^[a-z']+$"))
@@ -13,19 +15,74 @@ AFINN <- sentiments %>%
         filter(lexicon == "AFINN") %>%
         select(word, afinn_score = score)
 
-tweet1_sentiment <- tweet1_words %>%
+tweet_sentiment <- tweet_words %>%
         inner_join(AFINN, by = "word") %>%
         group_by(screenName) %>%
         summarize(sentiment = mean(afinn_score))
 
 
+t_sent <- function(dat){
+        
+        
+        tweet_words <- dat %>%
+                group_by(screenName) %>%
+                unnest_tokens(word, text) %>%
+                filter(!word %in% stop_words$word, str_detect(word, "^[a-z']+$"))
+        
+        AFINN <- sentiments %>%
+                filter(lexicon == "AFINN") %>%
+                select(word, afinn_score = score)
+        
+        tweet_sentiment <- tweet_words %>%
+                inner_join(AFINN, by = "word") %>%
+                group_by(screenName) %>%
+                summarize(sentiment = mean(afinn_score))
+        return(tweet_sentiment)
+}
+t1_sent <- t_sent(mutate(data, text = text1) %>% select(screenName, text)) %>% 
+        mutate(t1_sent = sentiment) %>% select(-sentiment)
+t2_sent <- t_sent(mutate(data, text = text2) %>% select(screenName, text)) %>% 
+        mutate(t2_sent = sentiment) %>% select(-sentiment)
+t3_sent <- t_sent(mutate(data, text = text3) %>% select(screenName, text)) %>% 
+        mutate(t3_sent = sentiment) %>% select(-sentiment)
+t4_sent <- t_sent(mutate(data, text = text4) %>% select(screenName, text)) %>% 
+        mutate(t4_sent = sentiment) %>% select(-sentiment)
+t5_sent <- t_sent(mutate(data, text = text5) %>% select(screenName, text)) %>% 
+        mutate(t5_sent = sentiment) %>% select(-sentiment)
+t6_sent <- t_sent(mutate(data, text = text6) %>% select(screenName, text)) %>% 
+        mutate(t6_sent = sentiment) %>% select(-sentiment)
+t7_sent <- t_sent(mutate(data, text = text7) %>% select(screenName, text)) %>% 
+        mutate(t7_sent = sentiment) %>% select(-sentiment)
+t8_sent <- t_sent(mutate(data, text = text8) %>% select(screenName, text)) %>% 
+        mutate(t8_sent = sentiment) %>% select(-sentiment)
+t9_sent <- t_sent(mutate(data, text = text9) %>% select(screenName, text)) %>% 
+        mutate(t9_sent = sentiment) %>% select(-sentiment)
+t10_sent <- t_sent(mutate(data, text = text10) %>% select(screenName, text)) %>% 
+        mutate(t10_sent = sentiment) %>% select(-sentiment)
+
+data <- data %>% full_join(t1_sent, by = "screenName") %>%
+        full_join(t2_sent, by = "screenName") %>%
+        full_join(t3_sent, by = "screenName") %>%
+        full_join(t4_sent, by = "screenName") %>%
+        full_join(t5_sent, by = "screenName") %>%
+        full_join(t6_sent, by = "screenName") %>%
+        full_join(t7_sent, by = "screenName") %>%
+        full_join(t8_sent, by = "screenName") %>%
+        full_join(t9_sent, by = "screenName") %>%
+        full_join(t10_sent, by = "screenName")
+
+colnames(data)
+
+data <- data %>% mutate(t_sent = (t1_sent + t2_sent + t3_sent + t4_sent +
+        t5_sent + t6_sent + t7_sent + t8_sent + t9_sent + t10_sent)/10 )
+
 
 
 ######### BELOW IS V TERRIBLE #####
 
-badwords <- as.vector(paste(readLines("badwords.txt")))
+badwords <- as.vector(paste(readLines("dictionaries/badwords.txt")))
 
-db1 <- db
+db <- data
 x <- vector()
 list_of_cammnds <- vector()
 
