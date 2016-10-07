@@ -1,21 +1,51 @@
 ---
-title: "DatSci"
+title: "Trollter"
 author: "Matt Cole"
-date: "September 30, 2016"
+date: "October 7, 2016"
 output: html_document
 ---
-## Objective
+```{}
+```
+## Introduction
 
-Internet trolls are a menace to virtual communities they are part of by creating fruitless discussions and generating emotional reactions. 
+Internet trolls are a considered a menace in nearly all online communities by creating fruitless arguments in an attempt to generate emotional, and typically angry reactions. Motivations behind these people are unclear, but some social scientists have postulated that a strange phenomenon known as the "disinhibition effect" may be to blame. Masked behind the apparent anonymity provided by many forms, sites, and the internet in general, social reservations that facilitate normal, face-to-face conversations are gone, resulting in sometimes wild and rude behavior. Troll behavior can range from simply posting the same status repeatidly to annoy and clog streams of information to violent threats and many, many 'things' inbetween. 
+  
+In this project, we focused on political trolls on Twitter, those whose tweets aim to disrupt a flow of information in the political sphere on twitter. 
+
 
 ## Data
 
-Data was collected from twitter using the twitter API using () sampling strategy.
+Trolls were defined as users with tweets which appeared to both:
+  
+* inflammatory: intended to arouse angry or violent feelings
+*  extraneous: irrelevant or unrelated to the subject being dealt with
 
-```{r warning=F}
+  
+Data was collected from twitter using both the Twitter API and web app. Initial data collection occured on ____ 
+
+```{r warning=F, echo=FALSE, message=FALSE}
 library(readr)
-twitter_data <- read_csv('output/db.csv')
-head(twitter_data)
-colnames(twitter_data)
+setwd("/Users/Matthew/Desktop/term1/data_science/DataScienceProject/Data_Science_Project")
+
+data <- read_csv("data/dataE.csv")
+
+
+boxplot(t1_sent ~ data$troll, data=data, col="blue", xlab="Troll", ylab="sentiment score",
+        main="most recent tweet")
+boxplot(statusesCount ~ troll, data=data, col="blue", xlab="Troll", ylab="number of statuses",
+        main="most recent tweet", log='y')
+
+boxplot(followersCount ~ troll, data=data, col="blue", xlab="Troll", ylab="number of followers",
+        main="most recent tweet", log='y')
+
+boxplot(created ~ troll, data=data, col="blue", xlab="Troll", ylab="created")
 ```
 
+
+
+```{r }
+lfit <- glm(troll~t_sent + statusesCount,data=data, family = "binomial")
+
+summary(lfit)
+
+```
