@@ -21,7 +21,7 @@ Trolls were defined as users with tweets which appeared to both:
 *  extraneous: irrelevant or unrelated to the subject being dealt with
 
   
-Data was collected from twitter using both the Twitter API and web app. Initial data collection occured on ____ 
+Data was collected from twitter using both the Twitter API and web app. Initial data collection consisted of both searching twitter for political names (ie. clinton, trump), and manual troll harvest.
 
 ```{r warning=F, echo=FALSE, message=FALSE}
 library(readr)
@@ -33,12 +33,13 @@ data <- read_csv("data/dataE.csv")
 boxplot(t1_sent ~ data$troll, data=data, col="blue", xlab="Troll", ylab="sentiment score",
         main="most recent tweet")
 boxplot(statusesCount ~ troll, data=data, col="blue", xlab="Troll", ylab="number of statuses",
-        main="most recent tweet", log='y')
+         log='y')
 
 boxplot(followersCount ~ troll, data=data, col="blue", xlab="Troll", ylab="number of followers",
-        main="most recent tweet", log='y')
+        log='y')
 
-boxplot(created ~ troll, data=data, col="blue", xlab="Troll", ylab="created")
+boxplot(as.Date(data$created, format = "%m/%d/%y") ~ troll, data=data, col="blue", xlab="Troll", ylab="created")
+
 ```
 
 
