@@ -2,7 +2,7 @@
 title: "Trollter"
 author: "Matt Cole"
 date: "October 7, 2016"
-output: html_document
+output: pdf_document
 ---
 ```{}
 ```
