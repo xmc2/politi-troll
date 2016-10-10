@@ -26,8 +26,30 @@ source("rscripts/selected_trolls.R")
 # 
 # existing_trolls <- select(read.csv("outputs/selected_trolls.csv"), -X)
 # 
-user_names <- c("jd_Constitution", "DeplorableChri1", "fulmen56", "EthanStew", "Trillvybe",
-                "BishopDawsom", "ElizabethDaQuee", "Tjsweetsong")
+
+
+
+#TO ADD :
+        
+hand_trolls <- c("Robertgreiner71", "analiensaturn", "katecove11", "MushroomThrowad",
+        "offensive_jake", "Dlhg35G", "545_6589", "patrioticpepe", "hpufo", "Parker9_", 
+        "MagicRoyalty", "qbjsu300", "rapidrunnr", "AustinOnSocial", "KlayVolk", 
+        "patrioticpepe", "TWTWsports", "MagicRoyalty", "EnemyWithinn", "idvck", "_MaryAli", 
+        "JhbTeam", "assbot", "Blob_Fish", "at_maggiemac", "themightylayman", 
+        "keksec__org", "New1000AD", "rsweat52", "HilaryClintin", "CarlKenner", 
+        "Blob_Fish", "mass_mont", "Bigsby_Jenkins", "VeraVanzetti", "mass_mont", 
+        "ThePepEra", "emilio_delgado", "sweetatertot2", 'TrumpBoySwag', 
+        "BarbMuenchen", "BucketOfLosers", "mrsh0neybee", "RapinBill", 
+        "jenilynn1001", "ConstanceQueen8", "Darren32895836", "SueSuli9", 
+        "MelanieMonroee", "EJKTwit", "terrymendozer", "YoungDems4Trump", 
+        "GirlyDarnelle", "dacw10", "SalubriousMind", "4JL2010", "LeahRBoss",
+        "jd_Constitution", "DeplorableChri1", "fulmen56", "EthanStew", "Trillvybe",
+        "BishopDawsom", "ElizabethDaQuee", "Tjsweetsong", 
+        "chrismar822", "debnam_lee", "GielauA","jenifercolins",
+        "janegarcia92", "normaturner912", "shadowjago101", "insertName49",
+        "katecove11", "whoshvnter", "alexrcarson", "MorganLsneed", "1mykfed",
+        "Robertgreiner71", "analiensaturn", "katecove11", "MushroomThrowad",
+        "offensive_jake", "Dlhg35G", "545_6589", "patrioticpepe", "NeilTurner_")
 
 x <- trolls(user_names)
 x$created <- as.character(x$created)
