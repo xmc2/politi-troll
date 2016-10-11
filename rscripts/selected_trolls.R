@@ -3,7 +3,7 @@
 trolls <- function(usernames){
         
         # lets get info from these users 
-        sample_users <- lookupUsers(user_names)
+        sample_users <- lookupUsers(usernames)
         sample_users_df <- twListToDF(sample_users)
         
         
@@ -27,7 +27,7 @@ trolls <- function(usernames){
         }
         
         list_dim <- data.frame()
-        tweet_count <- 20
+        tweet_count <- 10
         for (i in 1:length(user_names)){ 
                 w <- userTimeline(user_names[i],n=tweet_count, includeRts=TRUE)
                 if (identical(w, list()) == FALSE){
@@ -42,9 +42,8 @@ trolls <- function(usernames){
         # lets say that our data is in list_dim
         # we will now attempt to add tweet info to our data rows
         
-        tweetno <- 10
-        print(paste("There are", tweet_count, "tweets per user available."))
-        print(paste("We will collect the most recent", tweetno))
+        tweetno <- tweet_count
+        print(paste("We will collect the most recent", tweetno, "tweets"))
         
         for (i in 1:tweetno){
                 if (i == 1){
