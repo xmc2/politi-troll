@@ -2,7 +2,7 @@ library(readr); library(stringr); library(dplyr); library(tidytext)
 #### to obtain data we can either re generate
 # source("gettingdata.R")
 #### or we can collect what we have already produced
-data <- read_csv('data/data.csv')
+data <- read_csv('data/data1010.csv')
 
 
 
