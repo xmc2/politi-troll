@@ -9,9 +9,23 @@ hist(data[data$troll == T, ]$t_sent, col="blue", xlab="Troll", ylab="sentiment s
 plot(density(data[data$troll == T, ]$t_sent, bw=0.25))
 plot(density(data[data$troll == F, ]$t_sent, bw=0.25))
 
+ggplot(data, aes(t_sent, colour = troll)) +
+        geom_density( bw=0.3) +
+        ggtitle("sentiment score") +
+        xlim(-3.5, 3.5) + labs(x="sentiment") +
+        theme(legend.text=element_text(size=14), 
+              axis.text=element_text(size=16),
+              legend.title=element_text(size=16),
+              axis.title=element_text(size=20,face="bold"),
+              plot.title = element_text(size=22)) 
+
+
+theme()
+?ylab
+
 sm.density.compare(data$t_sent, data$troll, xlab="Sentiment Score",col=c("blue", "red"))
-legend(x="topleft", col = c("red", "blue"), c("troll", "not"),lty=c(1,1))
-title(main="Sentiment Score by group")
+legend(x="topleft", col = c("red", "blue"), c("Troll", "Not a Troll"),lty=c(1,1))
+title(main="Average tweet sentiment")
 colnames(data)
 
 

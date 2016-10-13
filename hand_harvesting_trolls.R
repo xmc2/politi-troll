@@ -7,7 +7,7 @@ source("rscripts/selected_trolls.R")
 hand_trolls <- c()
 
 # this is all of the already collected data
-data <- read_csv('data/data.csv') %>%
+data <- read_csv('data/data1010.csv') %>%
         mutate(screenName = tolower(screenName))
 
 # we will remove duplicates from the dataset
@@ -32,9 +32,9 @@ hand_trolls_data <- trolls(user_names)
 hand_trolls_data %>%
         select(screenName, text1, text2, text3, text4, text5, text6, text7, text8, 
         text9, text10) %>%
-        write_csv('outputs/classify1010.csv')
+        write_csv('outputs/classify1013.csv')
 
-classified_trolls <- read_csv('outputs/classify1010.csv') %>%
+classified_trolls <- read_csv('outputs/classify1013.csv') %>%
         select(screenName, troll)
 
 hand_trolls_classified <- hand_trolls_data %>% 
@@ -43,4 +43,4 @@ hand_trolls_classified <- hand_trolls_data %>%
 data <- data %>%
         rbind(hand_trolls_classified)
 
-write_csv(data, 'data/data1010.csv')
+write_csv(data, 'data/data1013.csv')
