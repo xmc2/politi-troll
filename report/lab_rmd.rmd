@@ -97,13 +97,17 @@ error_log2 <- mean((predict.glm(logistic_fit2, data,type="response") >= 0.5) == 
 ```
 
 Here we see that the pruned regression tree has a cv-prediction error rate of `r `
-using a simple logistic regression we found a prediction error of `r 1-round(error_log1, 2)` and including more relevant variables `r 1-round(error_log2, 2)`
+using a simple logistic regression we found a prediction error of `r 1-round(error_log1, 2)` and including more relevant variables `r 1-round(error_log2, 2)`. The regression tree was pruned according to 10-fold cross vadiated prediction error.
 
 
 
 ## Discussion 
 
+* regression trees
+** recursive partitioning
+
+
 ## Thank you
 
 Finn Årup Nielsen manually labeled the words in the AFINN from 2009-2011.
-Thank you to http://unicode.org/emoji/charts/full-emoji-list.html for letting me borrow that 
+Thank you to http://unicode.org/emoji/charts/full-emoji-list.html for letting me borrow the list. 
