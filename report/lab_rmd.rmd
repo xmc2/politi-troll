@@ -1,8 +1,8 @@
 ---
-title: "Trollter"
+title: "Troll Project"
 author: "Matt Cole"
 date: "October 7, 2016"
-output: html_document
+output: pdf_document
 ---
 ## Introduction
 
@@ -26,12 +26,13 @@ Data was collected from twitter using both the Twitter API and web app. Initial 
 Using data from the last ten tweets (inclusive of retweets), we were able to assess average tweet sentiment using the AFINN lexicon which comprises of English words with valence measures between -5 and 5 inclusive with an integer between minus five (negative) and plus five (positive). Additional lexicons which include the NRC Emotion Lexicon, which assigns 'scores' to each of two sentiments and eight emotions were used too. As emojis have become increasingly popular in today's web-based communication, an emoji dictionary was scrapped from unicode.org and emoji usage as well as sentiments was assessed. 
 
 ```{r load_packages_data, warning=F, echo=FALSE, message=FALSE, cache=TRUE}
-library(readr); library(sm);library(ggplot2); library(rpart); library(boot); library(sm); library(lubridate); library(rpart.plot)
+library(readr); library(sm);library(ggplot2); library(rpart); library(boot); library(sm); library(lubridate); library(rpart.plot); library(rpart)
 library(e1071)
 setwd("/Users/Matthew/Desktop/term1/data_science/DataScienceProject/Data_Science_Project")
 
 source('rscripts/editing.R')
 ```
+
 ```{r plots, warning=F, echo=FALSE, message=FALSE, cache=TRUE}
 old.par <- par(mfrow=c(2, 2))
 par(old.par)
@@ -58,25 +59,46 @@ Several statistical and machine learning techniques were used in an attempt to p
 
 ## Results
 
-```{r}
+```{r running_analysis, echo=FALSE}
+library(rpart); library(rpart.plot); library(boot)
 fit <- rpart(troll~t_sent+created+followersCount+listedCount+statusesCount+favoritesCount+friendsCount+
                      lang, data=data, method="class")
-plotcp(fit)
-rpart.plot(fit)
+#plotcp(fit)
+#rpart.plot(fit)
 
 ###
 pfit <- prune(fit, cp=fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"])
-printcp(pfit)
-plotcp(pfit)
+#printcp(pfit)
+#plotcp(pfit)
 
-summary(pfit)
+#summary(pfit)
 par(mfrow=c(1, 1))
 
 # plot the pruned tree 
 rpart.plot(pfit, type = 3,uniform=TRUE, 
      main="Pruned Classification Tree for Troll", digits=2, tweak =1.5)
 
+
+###
+#### LOGISTIC REGRESSION 
+### 
+
+logistic_fit1 <- glm(troll ~ t_sent, family = binomial(link = "logit"), data=data)
+logistic_fit1_cv <- cv.glm(data, logistic_fit1)
+logistic_fit1_cv$delta[1]
+
+logistic_fit2 <- glm(troll ~ t_sent+created+followersCount+listedCount+statusesCount, 
+                     family = binomial(link = "logit"), data=data)
+logistic_fit2_cv <- cv.glm(data, logistic_fit2)
+logistic_fit2_cv$delta[2]
+
+error_log1 <- mean((predict.glm(logistic_fit1, data,type="response") >= 0.5) == (data$troll == 1))
+error_log2 <- mean((predict.glm(logistic_fit2, data,type="response") >= 0.5) == (data$troll == 1))
 ```
+
+Here we see that the pruned regression tree has a cv-prediction error rate of `r `
+using a simple logistic regression we found a prediction error of `r 1-round(error_log1, 2)` and including more relevant variables `r 1-round(error_log2, 2)`
+
 
 
 ## Discussion 

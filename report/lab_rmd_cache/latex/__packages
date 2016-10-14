@@ -1,0 +1,12 @@
+base
+readr
+sm
+ggplot2
+rpart
+boot
+lubridate
+rpart.plot
+e1071
+stringr
+dplyr
+tidytext
