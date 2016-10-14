@@ -2,15 +2,13 @@
 title: "Trollter"
 author: "Matt Cole"
 date: "October 7, 2016"
-output: pdf_document
+output: html_document
 ---
-```{}
-```
 ## Introduction
 
-Internet trolls are a considered a menace in nearly all online communities by creating fruitless arguments in an attempt to generate emotional, and typically angry reactions. Motivations behind these people are unclear, but some social scientists have postulated that a strange phenomenon known as the "disinhibition effect" may be to blame. Masked behind the apparent anonymity provided by many forms, sites, and the internet in general, social reservations that facilitate normal, face-to-face conversations are gone, resulting in sometimes wild and rude behavior. Troll behavior can range from simply posting the same status repeatidly to annoy and clog streams of information to violent threats and many, many 'things' inbetween. 
-  
-In this project, we focused on political trolls on Twitter, those whose tweets aim to disrupt a flow of information in the political sphere on twitter. 
+Internet trolls are a considered a menace in nearly all online communities by creating fruitless arguments in an attempt to generate emotional, and typically angry reactions. Motivations behind these people are unclear, but some social scientists have postulated that a strange phenomenon known as the "disinhibition effect" may be to blame. Masked behind the apparent anonymity provided by many forms, sites, and the internet in general, social reservations that facilitate normal, face-to-face conversations are gone, resulting in sometimes wild and rude behavior. Troll behavior can range from simply posting the same status repeatedly to annoy and clog streams of information to violent threats and many, many 'things' in between. 
+
+In this project, we focused on political trolls on Twitter, those whose tweets aim to disrupt the flow of information on twitters political sphere. 
 
 
 ## Data
@@ -21,34 +19,69 @@ Trolls were defined as users with tweets which appeared to both:
 *  extraneous: irrelevant or unrelated to the subject being dealt with
 
   
-Data was collected from twitter using both the Twitter API and web app. Initial data collection consisted of both searching twitter for political names (ie. clinton, trump), and manual troll harvest. In total, around 2000 tweets from 271 individual accounts were assessed and catororized.
+Data was collected from twitter using both the Twitter API and web app. Initial data collection consisted of both searching twitter for political figures in tweet text (ie. clinton, trump). Manual user harvesting consisted of browsing political figures’ accounts in an attempt to find associated users whom were  and manual troll harvest. In total, around 2000 tweets from 271 individual accounts were assessed and categorized by reading the most recent 10 tweets at time of data collection from each user.
 
-```{r warning=F, echo=FALSE, message=FALSE}
-library(readr)
+##
+
+Using data from the last ten tweets (inclusive of retweets), we were able to assess average tweet sentiment using the AFINN lexicon which comprises of English words with valence measures between -5 and 5 inclusive with an integer between minus five (negative) and plus five (positive). Additional lexicons which include the NRC Emotion Lexicon, which assigns 'scores' to each of two sentiments and eight emotions were used too. As emojis have become increasingly popular in today's web-based communication, an emoji dictionary was scrapped from unicode.org and emoji usage as well as sentiments was assessed. 
+
+```{r load_packages_data, warning=F, echo=FALSE, message=FALSE, cache=TRUE}
+library(readr); library(sm);library(ggplot2); library(rpart); library(boot); library(sm); library(lubridate); library(rpart.plot)
+library(e1071)
 setwd("/Users/Matthew/Desktop/term1/data_science/DataScienceProject/Data_Science_Project")
 
-data <- read_csv("data/dataE.csv")
+source('rscripts/editing.R')
+```
+```{r plots, warning=F, echo=FALSE, message=FALSE, cache=TRUE}
+old.par <- par(mfrow=c(2, 2))
+par(old.par)
 
+par(mfrow=c(2, 2))
+sm.density.compare(data$t_sent, data$troll, xlab="Sentiment Score",col=c("blue", "red"), lwd=2)
+#legend(x="topleft", col = c("red", "blue"), c("Troll", "Not a Troll"),lty=c(1,1))
+#title(main="Average tweet sentiment")
 
-boxplot(t_sent ~ data$troll, data=data, col="blue", xlab="Troll", ylab="sentiment score",
-        main="most recent tweet")
-boxplot(statusesCount ~ troll, data=data, col="blue", xlab="Troll", ylab="number of statuses",
-         log='y')
+sm.density.compare(data$statusesCount, data$troll, xlab="status count",col=c("blue", "red"), lwd=2)
+sm.density.compare(data$followersCount, data$troll, xlab="followers count",col=c("blue", "red"), lwd=2)
+sm.density.compare(year(data$created), data$troll, xlab="year created",col=c("blue", "red"), lwd=2)
 
-boxplot(followersCount ~ troll, data=data, col="blue", xlab="Troll", ylab="number of followers",
-        log='y')
+# boxplot(statusesCount ~ troll, data=data, col="blue", xlab="Troll", ylab="number of statuses",
+#          log='y')
+# 
+# boxplot(followersCount+1 ~ troll, data=data, col="blue", xlab="Troll", ylab="number of followers",
+#         log='y')
+# 
+# boxplot(as.Date(data$created, format = "%m/%d/%y") ~ troll, data=data, col="blue", xlab="Troll", ylab="created")
+```
 
-boxplot(as.Date(data$created, format = "%m/%d/%y") ~ troll, data=data, col="blue", xlab="Troll", ylab="created")
+Several statistical and machine learning techniques were used in an attempt to predict whether a user was a troll or not including linear regression, cart, and svm. 
+
+## Results
+
+```{r}
+fit <- rpart(troll~t_sent+created+followersCount+listedCount+statusesCount+favoritesCount+friendsCount+
+                     lang, data=data, method="class")
+plotcp(fit)
+rpart.plot(fit)
+
+###
+pfit <- prune(fit, cp=fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"])
+printcp(pfit)
+plotcp(pfit)
+
+summary(pfit)
+par(mfrow=c(1, 1))
+
+# plot the pruned tree 
+rpart.plot(pfit, type = 3,uniform=TRUE, 
+     main="Pruned Classification Tree for Troll", digits=2, tweak =1.5)
 
 ```
 
 
+## Discussion 
 
-```{r }
-lfit <- glm(troll~t_sent + statusesCount,data=data, family = "binomial")
+## Thank you
 
-summary(lfit)
-
-```
-
-Once data was classified 
+Finn Årup Nielsen manually labeled the words in the AFINN from 2009-2011.
+Thank you to http://unicode.org/emoji/charts/full-emoji-list.html for letting me borrow that 

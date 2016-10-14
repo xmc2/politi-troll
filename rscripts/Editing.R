@@ -2,7 +2,7 @@ library(readr); library(stringr); library(dplyr); library(tidytext)
 #### to obtain data we can either re generate
 # source("gettingdata.R")
 #### or we can collect what we have already produced
-data <- read_csv('data/data1010.csv')
+data <- read_csv('data/data1013.csv')
 
 
 
@@ -70,6 +70,8 @@ data <- data %>% full_join(t1_sent, by = "screenName") %>%
         full_join(t8_sent, by = "screenName") %>%
         full_join(t9_sent, by = "screenName") %>%
         full_join(t10_sent, by = "screenName")
+rm(t1_sent, t2_sent, t3_sent, t4_sent, t5_sent, t6_sent, t7_sent, t8_sent, t9_sent, t10_sent)
+
 data$t1_sent <- ifelse(is.na(data$t1_sent), 0, data$t1_sent)
 data$t2_sent <- ifelse(is.na(data$t2_sent), 0, data$t2_sent)
 data$t3_sent <- ifelse(is.na(data$t3_sent), 0, data$t3_sent)
