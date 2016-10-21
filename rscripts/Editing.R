@@ -172,58 +172,35 @@ data <- data %>% mutate(user_w = user_w1 + user_w2 + user_w3 + user_w4+ user_w5+
                         user_w7 + + user_w8 +  user_w9 +  user_w10)
 
 write_csv(data, "data/dataE.csv")
-######### BELOW IS V TERRIBLE #####
-# 
-# badwords <- as.vector(paste(readLines("dictionaries/badwords.txt")))
-# 
-# db <- data
-# x <- vector()
-# list_of_cammnds <- vector()
-# 
-# 
-# for (i in 1:10){ # this is terrible for readability .... 
-#         x <- paste("db <- mutate(db, reply", i," = !is.na(replyToSN", i, "))", sep="")
-#         list_of_cammnds <- append(list_of_cammnds, x)
-#         eval(parse(text=x))
-#         x <- paste("db <- mutate(db, tweet_location", i," = !is.na(latitude", i, "))", sep="")
-#         eval(parse(text=x))
-#         list_of_cammnds <- append(list_of_cammnds, x)
-#         x <- paste("db <- select(db, -truncated", i, ", -latitude", i, ", -longitude",i,"
-#                    , -id",i, ", -created",i, ", -replyToSID",i, ", -replyToSN", i,
-#                 ", -replyToSID",i, ")"
-#                    , sep="")
-#         list_of_cammnds <- append(list_of_cammnds, x)
-#         eval(parse(text=x))
-# }
-# db[,]$text1 <- iconv(db[,]$text1, from="UTF-8", to="latin1")
-# db[,]$text2 <- iconv(db[,]$text2, from="UTF-8", to="latin1")
-# db[,]$text3 <- iconv(db[,]$text3, from="UTF-8", to="latin1")
-# db[,]$text4 <- iconv(db[,]$text4, from="UTF-8", to="latin1")
-# db[,]$text5 <- iconv(db[,]$text5, from="UTF-8", to="latin1")
-# db[,]$text6 <- iconv(db[,]$text6, from="UTF-8", to="latin1")
-# db[,]$text7 <- iconv(db[,]$text7, from="UTF-8", to="latin1")
-# db[,]$text8 <- iconv(db[,]$text8, from="UTF-8", to="latin1")
-# db[,]$text9 <- iconv(db[,]$text9, from="UTF-8", to="latin1")
-# db[,]$text10 <- iconv(db[,]$text10, from="UTF-8", to="latin1")
-# 
-# 
-# 
-# 
-# db$bdtxt1 <- 0; db$bdtxt2 <- 0; db$bdtxt3 <- 0; db$bdtxt4 <- 0; db$bdtxt5 <- 0
-# db$bdtxt6 <- 0; db$bdtxt7 <- 0; db$bdtxt8 <- 0; db$bdtxt9 <- 0; db$bdtxt10 <- 0
-# 
-# 
-# ####
-# for (j in 1:nrow(db)){
-# w <- unlist(strsplit(tolower(strsplit(db[j,]$text1, split="\n", fixed = T)[[1]]), split = " "))
-# wct <- 0
-#         for (i in 1:length(w)){
-#                 wct <- wct + w[i] %in% badwords
-#         }
-#         db[j,]$bdtxt1 <- wct
-#         #
-# }
-# db$bdtxt1
+
+
+###
+### Loading bad words dictionary
+###
+
+badwords <- as.vector(paste(readLines("dictionaries/badwords.txt")))
+
+## creating one vector with all the tweet texts smashed together
+
+data$text <- paste(data$text1, data$text2, data$text3,data$text4,data$text5,data$text6,
+              data$text7,data$text8,data$text9,data$text10, sep=" ")
+
+tweet_dat <- unnest_tokens(data, output, text, token = "words", to_lower = TRUE,
+              drop = FALSE) %>% select(output,screenName)
+        
+tweet_dat <- mutate(tweet_dat, bdword = output %in% badwords)  %>%
+        group_by(bdword,screenName) %>% 
+        filter(bdword == TRUE) %>%
+        summarize(n=n()) 
+
+data <- full_join(data,tweet_dat, by="screenName")
+rm(tweet_dat)
+
+
+
+
+
+
 # for (j in 1:nrow(db)){
 # w <- unlist(strsplit(tolower(strsplit(db[j,]$text2, split="\n", fixed = T)[[1]]), split = " "))
 # wct <- 0
