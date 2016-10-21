@@ -1,4 +1,4 @@
-library(rvest)
+library(rvest); library(readr)
 library(dplyr)
 
 
@@ -13,5 +13,5 @@ head(population)
 # getting rid of weird headings in the middle of the dataframe...
 population <- population[!(population$X. == "№"), ]
 population <- select(population, -Chart, -Apple, -Goog., -Twtr., -One, -FBM, -Wind., -Sams., -GMail,
-                     -SB, -DCM, -KDDI, -Name)
-colnames(population)
+                     -SB, -DCM, -KDDI, -Name) %>%
+        write_csv("dictionaries/emoji.csv")
