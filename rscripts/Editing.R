@@ -11,6 +11,10 @@ tweet_words <- data %>% select(screenName, text1) %>%
         unnest_tokens(word, text1) %>%
         filter(!word %in% stop_words$word, str_detect(word, "^[a-z']+$"))
 
+AFINN <- sentiments %>%
+        filter(lexicon == "AFFIN") %>%
+        dplyr::select(word, sentiment)
+
 nrc <- sentiments %>%
         filter(lexicon == "nrc") %>%
         dplyr::select(word, sentiment)
@@ -104,6 +108,7 @@ data <- data %>% mutate(t_sent = (t1_sent + t2_sent + t3_sent + t4_sent +
 
 
 data <- data %>% full_join(bad) 
+data$angry <- ifelse(is.na(data$angry),0,data$angry)
 
 # is the profile image the 'egg'?
 data$imagedefault <- grepl("default_profile_images", data$profileImageUrl)
@@ -171,7 +176,6 @@ data$user_w10 <- web_user(data$statusSource10)
 data <- data %>% mutate(user_w = user_w1 + user_w2 + user_w3 + user_w4+ user_w5+ user_w6 +
                         user_w7 + + user_w8 +  user_w9 +  user_w10)
 
-write_csv(data, "data/dataE.csv")
 
 
 ###
@@ -188,117 +192,13 @@ data$text <- paste(data$text1, data$text2, data$text3,data$text4,data$text5,data
 tweet_dat <- unnest_tokens(data, output, text, token = "words", to_lower = TRUE,
               drop = FALSE) %>% select(output,screenName)
         
-tweet_dat <- mutate(tweet_dat, bdword = output %in% badwords)  %>%
+tweet_dat2 <- mutate(tweet_dat, bdword = output %in% badwords)  %>%
         group_by(bdword,screenName) %>% 
         filter(bdword == TRUE) %>%
-        summarize(n=n()) 
+        summarize(n=n()) %>% 
+        mutate(badwords = n) %>% select(screenName, badwords)
+data
+data <- full_join(data,tweet_dat2, by="screenName")
+data$badwords <- ifelse(is.na(data$badwords), 0, data$badwords)
+write_csv(data, "data/dataE.csv")
 
-data <- full_join(data,tweet_dat, by="screenName")
-rm(tweet_dat)
-
-
-
-
-
-
-# for (j in 1:nrow(db)){
-# w <- unlist(strsplit(tolower(strsplit(db[j,]$text2, split="\n", fixed = T)[[1]]), split = " "))
-# wct <- 0
-#         for (i in 1:length(w)){
-#                 wct <- wct + w[i] %in% badwords
-#         }
-# db[j,]$bdtxt2 <- wct
-#         #
-# w <- unlist(strsplit(tolower(strsplit(db[j,]$text3, split="\n", fixed = T)[[1]]), split = " "))
-# wct <- 0
-#         for (i in 1:length(w)){
-#                 wct <- wct + w[i] %in% badwords
-#         }
-# db[j,]$bdtxt3 <- wct
-#         #
-# w <- unlist(strsplit(tolower(strsplit(db[j,]$text4, split="\n", fixed = T)[[1]]), split = " "))
-# wct <- 0
-#         for (i in 1:length(w)){
-#                 wct <- wct + w[i] %in% badwords
-#         }
-# db[j,]$bdtxt4 <- wct
-#         #
-# w <- unlist(strsplit(tolower(strsplit(db[j,]$text5, split="\n", fixed = T)[[1]]), split = " "))
-# wct <- 0
-#         for (i in 1:length(w)){
-#                 wct <- wct + w[i] %in% badwords
-#         }
-# db[j,]$bdtxt5 <- wct
-#         #
-# w <- unlist(strsplit(tolower(strsplit(db[j,]$text6, split="\n", fixed = T)[[1]]), split = " "))
-# wct <- 0
-#         for (i in 1:length(w)){
-#                 wct <- wct + w[i] %in% badwords
-#         }
-# db[j,]$bdtxt6 <- wct
-#         #
-# w <- unlist(strsplit(tolower(strsplit(db[j,]$text7, split="\n", fixed = T)[[1]]), split = " "))
-# wct <- 0
-#         for (i in 1:length(w)){
-#                 wct <- wct + w[i] %in% badwords
-#         }
-# db[j,]$bdtxt7 <- wct
-#         #
-# w <- unlist(strsplit(tolower(strsplit(db[j,]$text8, split="\n", fixed = T)[[1]]), split = " "))
-# wct <- 0
-#         for (i in 1:length(w)){
-#                 wct <- wct + w[i] %in% badwords
-#         }
-#         db[j,]$bdtxt8 <- wct
-#         #
-#         w <- unlist(strsplit(tolower(strsplit(db[j,]$text9, split="\n", fixed = T)[[1]]), split = " "))
-#         wct <- 0
-#         for (i in 1:length(w)){
-#                 wct <- wct + w[i] %in% badwords
-#         }
-#         db[j,]$bdtxt9 <- wct
-#         #
-#         w <- unlist(strsplit(tolower(strsplit(db[j,]$text10, split="\n", fixed = T)[[1]]), split = " "))
-#         wct <- 0
-#         for (i in 1:length(w)){
-#                 wct <- wct + w[i] %in% badwords
-#         }
-#         db[j,]$bdtxt10 <- wct
-# }
-# 
-# 
-# # would like a variable that is proportion of letters that are caps #
-# 
-# db$cap1 <- db$cap2 <- db$cap3 <- db$cap4 <- db$cap5 <- db$cap6 <- db$cap7 <- db$cap8 <- 0
-# db$cap9 <- db$cap10 <- 0
-# 
-# # loading the 'excited' vector up... #
-# excited<-as.vector(paste(readLines("excited.txt")))
-# 
-# 
-# # tweetletters <-unlist(strsplit(unlist(strsplit(strsplit(db[64,]$text2, split="\n", fixed = T)[[1]], split = " ")),split=""))
-# # for (i in 1:length(excited)){
-# #         print(excited[i])
-# # }
-# 
-# excited_text_reader <- function(text, dict = excited){
-#         x <- unlist(strsplit(unlist(strsplit(strsplit(text, split="\n", fixed = T)[[1]], split = " ")),split=""))
-#         count <- 0
-#         count = sum(x %in% dict)
-#         return(count)
-# }
-# 
-# db$cap1 <- sapply(db$text1, excited_text_reader)
-# db$cap2 <- sapply(db$text2, excited_text_reader)
-# db$cap3 <- sapply(db$text3, excited_text_reader)
-# db$cap4 <- sapply(db$text4, excited_text_reader)
-# db$cap5 <- sapply(db$text5, excited_text_reader)
-# db$cap6 <- sapply(db$text6, excited_text_reader)
-# db$cap7 <- sapply(db$text7, excited_text_reader)
-# db$cap8 <- sapply(db$text8, excited_text_reader)
-# db$cap9 <- sapply(db$text9, excited_text_reader)
-# db$cap10 <- sapply(db$text10, excited_text_reader)
-# 
-# #
-# 
-# write.csv(db, "processed.csv")

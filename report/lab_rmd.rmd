@@ -2,7 +2,7 @@
 title: "Troll Project"
 author: "Matt Cole"
 date: "October 7, 2016"
-output: pdf_document
+output: html_document
 ---
 ## Introduction
 
@@ -31,6 +31,7 @@ library(e1071)
 setwd("/Users/Matthew/Desktop/term1/data_science/DataScienceProject/Data_Science_Project")
 
 source('rscripts/editing.R')
+data <- read_csv("data/dataE.csv")
 ```
 
 ```{r plots, warning=F, echo=FALSE, message=FALSE, cache=TRUE}
@@ -56,20 +57,19 @@ sm.density.compare(year(data$created), data$troll, xlab="year created",col=c("bl
 ```
 
 Several statistical and machine learning techniques were used in an attempt to predict whether a user was a troll or not including linear regression, cart, and svm. 
+CART are a group of supervised machine learning methods which construct models utilizing observed data. Unlike other popular methods for classification and regression (consider logistic regression and other multiple generalized linear models), regression trees are not global models, where a single predictive formula is employed to make decisions or predictions over all observations (James et al., 2013). Instead, CART methods break down the feature space containing the observations into small subspaces (called recursive partitioning) until the subspaces are able to be represented by relatively simple models that do not necessarily utilize all covariates presented in feature space. Benefits of CART methods include its high level of interpretability and simple models, automatic variable selection, and ease of visualization. The classification tree was grown using many features and pruned to minimize the cv-10 error rate. A major issue of 
 
 ## Results
 
 ```{r running_analysis, echo=FALSE}
 library(rpart); library(rpart.plot); library(boot)
 fit <- rpart(troll~t_sent+created+followersCount+listedCount+statusesCount+favoritesCount+friendsCount+
-                     lang, data=data, method="class")
-#plotcp(fit)
-#rpart.plot(fit)
+                     lang+bdword+user_w+user_a+user_m + angry + imagedefault, data=data, method="class")
+
 
 ###
 pfit <- prune(fit, cp=fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"])
-#printcp(pfit)
-#plotcp(pfit)
+
 
 #summary(pfit)
 par(mfrow=c(1, 1))
@@ -82,12 +82,15 @@ rpart.plot(pfit, type = 3,uniform=TRUE,
 ###
 #### LOGISTIC REGRESSION 
 ### 
+library(glmnet)
 
 logistic_fit1 <- glm(troll ~ t_sent, family = binomial(link = "logit"), data=data)
-logistic_fit1_cv <- cv.glm(data, logistic_fit1)
+logistic_fit1_cv <- cv.glm(data, logistic_fit1, K = 10)
 logistic_fit1_cv$delta[1]
 
-logistic_fit2 <- glm(troll ~ t_sent+created+followersCount+listedCount+statusesCount, 
+logistic_fit2 <- glm(troll~t_sent+created+followersCount+listedCount+statusesCount+
+        favoritesCount+friendsCount+
+                     bdword, 
                      family = binomial(link = "logit"), data=data)
 logistic_fit2_cv <- cv.glm(data, logistic_fit2)
 logistic_fit2_cv$delta[2]

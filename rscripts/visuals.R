@@ -46,9 +46,9 @@ train_set <- data[-test_obs,]
 ###
 #### REGRESSION TREES 
 ###
-
+colnames(data)
 fit <- rpart(troll~t_sent+created+followersCount+listedCount+statusesCount+favoritesCount+friendsCount+
-                     lang, data=data, method="class")
+                     lang+badwords+user_w+user_a+user_m + angry + imagedefault, data=data, method="class")
 plotcp(fit)
 rpart.plot(fit)
 
@@ -63,6 +63,7 @@ par(mfrow=c(1, 1))
 # plot the pruned tree 
 rpart.plot(pfit, type = 3,uniform=TRUE, 
      main="Pruned Classification Tree for Troll", digits=2, tweak =1.5)
+pfit$cptable
 #?rpart.plot
 #text(pfit, use.n=TRUE, all=TRUE, cex=.5, offset=0)
 
@@ -80,11 +81,12 @@ logistic_fit1 <- glm(troll ~ t_sent, family = binomial(link = "logit"), data=dat
 logistic_fit1_cv <- cv.glm(data, logistic_fit1)
 logistic_fit1_cv$delta[1]
 
-logistic_fit2 <- glm(troll ~ t_sent+created+followersCount+listedCount+statusesCount, 
+logistic_fit2 <- glm(troll~t_sent+followersCount+listedCount+favoritesCount+
+                             badwords+user_m  + imagedefault, 
                      family = binomial(link = "logit"), data=data)
 logistic_fit2_cv <- cv.glm(data, logistic_fit2)
 logistic_fit2_cv$delta[1]
-
+summary(logistic_fit2)
 
 ###
 #### SVM
@@ -105,11 +107,15 @@ plot(svmfit, data=data)
 ###
 #### FOREST
 ### 
+troll~t_sent+created+followersCount+listedCount+statusesCount+favoritesCount+friendsCount+
+        lang+bdword+user_w+user_a+user_m + angry + imagedefault
 
 library(randomForest)
 fit_forest <- randomForest(as.factor(troll)~t_sent+created+followersCount+listedCount+
-                statusesCount+favoritesCount+friendsCount,   
-                    data=data)
+        statusesCount+favoritesCount+friendsCount+angry+imagedefault+user_m+bdword+user_w+user_a, 
+                           data=data)
+fit_forest
+data$bdword
 
 print(fit_forest) # view results 
 importance(fit_forest) # importance of each predictor
