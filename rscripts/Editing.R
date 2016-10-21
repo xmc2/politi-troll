@@ -6,14 +6,14 @@ data <- read_csv('data/data1013.csv')
 
 
 
-tweet_words <- data %>% select(screenName, text1, text2) %>%
+tweet_words <- data %>% select(screenName, text1) %>%
         group_by(screenName) %>%
         unnest_tokens(word, text1) %>%
         filter(!word %in% stop_words$word, str_detect(word, "^[a-z']+$"))
 
-AFINN <- sentiments %>%
-        filter(lexicon == "AFINN") %>%
-        select(word, afinn_score = score)
+nrc <- sentiments %>%
+        filter(lexicon == "nrc") %>%
+        dplyr::select(word, sentiment)
 
 tweet_sentiment <- tweet_words %>%
         inner_join(AFINN, by = "word") %>%
@@ -83,11 +83,93 @@ data$t8_sent <- ifelse(is.na(data$t8_sent), 0, data$t8_sent)
 data$t9_sent <- ifelse(is.na(data$t9_sent), 0, data$t9_sent)
 data$t10_sent <- ifelse(is.na(data$t10_sent), 0, data$t10_sent)
 
-colnames(data)
+### NRC
+nrc <- sentiments %>%
+        filter(lexicon == "nrc") %>%
+        dplyr::select(word, sentiment)
 
+tweet_words
+
+nrc_sent = tweet_words %>% inner_join(nrc)
+
+nrc_sent %>% group_by(sentiment,screenName) %>% summarize(n=n())
+
+bad = nrc_sent %>%  #mutate(hour = hour(created)) %>% 
+        group_by(screenName) %>% summarize(angry = mean(sentiment=="anger" | sentiment=="fear" | sentiment =="disgust")) %>% ungroup()
+
+
+###
 data <- data %>% mutate(t_sent = (t1_sent + t2_sent + t3_sent + t4_sent +
         t5_sent + t6_sent + t7_sent + t8_sent + t9_sent + t10_sent)/10 )
 
+
+data <- data %>% full_join(bad) 
+
+# is the profile image the 'egg'?
+data$imagedefault <- grepl("default_profile_images", data$profileImageUrl)
+
+#####
+##### now we will look at what sources the data are
+#####
+
+mobile_user <- function(tweet_source){
+        x <- grepl("Android",tweet_source) + 
+                grepl("phone",tweet_source) + 
+                grepl("iPad",tweet_source) != 0
+        return(x)
+}
+
+automate_user <- function(tweet_source){
+        grepl("withher3", data$statusSource8) + grepl("bot", data$statusSource8) + 
+        grepl("www.keksec.org", data$statusSource8) != 0
+}
+
+web_user <- function(tweet_source){
+        x <- grepl("TweetDeck", data$statusSource8) != 0
+        return(x)
+}
+
+data$user_m1 <- mobile_user(data$statusSource1)
+data$user_m2 <- mobile_user(data$statusSource2)
+data$user_m3 <- mobile_user(data$statusSource3)
+data$user_m4 <- mobile_user(data$statusSource4)
+data$user_m5 <- mobile_user(data$statusSource5)
+data$user_m6 <- mobile_user(data$statusSource6)
+data$user_m7 <- mobile_user(data$statusSource7)
+data$user_m8 <- mobile_user(data$statusSource8)
+data$user_m9 <- mobile_user(data$statusSource9)
+data$user_m10 <- mobile_user(data$statusSource10)
+
+data <- data %>% mutate(user_m = user_m1 + user_m2 + user_m3 + user_m4+ user_m5+ user_m6 +
+                         user_m7 + + user_m8 +  user_m9 +  user_m10)
+?mean
+data$user_a1 <- automate_user(data$statusSource1)
+data$user_a2 <- automate_user(data$statusSource2)
+data$user_a3 <- automate_user(data$statusSource3)
+data$user_a4 <- automate_user(data$statusSource4)
+data$user_a5 <- automate_user(data$statusSource5)
+data$user_a6 <- automate_user(data$statusSource6)
+data$user_a7 <- automate_user(data$statusSource7)
+data$user_a8 <- automate_user(data$statusSource8)
+data$user_a9 <- automate_user(data$statusSource9)
+data$user_a10 <- automate_user(data$statusSource10)
+
+data <- data %>% mutate(user_a = user_a1 + user_a2 + user_a3 + user_a4+ user_a5+ user_a6 +
+                        user_a7 + + user_a8 +  user_a9 +  user_a10)
+
+data$user_w1 <- web_user(data$statusSource1)
+data$user_w2 <- web_user(data$statusSource2)
+data$user_w3 <- web_user(data$statusSource3)
+data$user_w4 <- web_user(data$statusSource4)
+data$user_w5 <- web_user(data$statusSource5)
+data$user_w6 <- web_user(data$statusSource6)
+data$user_w7 <- web_user(data$statusSource7)
+data$user_w8 <- web_user(data$statusSource8)
+data$user_w9 <- web_user(data$statusSource9)
+data$user_w10 <- web_user(data$statusSource10)
+
+data <- data %>% mutate(user_w = user_w1 + user_w2 + user_w3 + user_w4+ user_w5+ user_w6 +
+                        user_w7 + + user_w8 +  user_w9 +  user_w10)
 
 write_csv(data, "data/dataE.csv")
 ######### BELOW IS V TERRIBLE #####
