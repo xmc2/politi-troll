@@ -46,6 +46,7 @@ train_set <- data[-test_obs,]
 ###
 #### REGRESSION TREES 
 ###
+
 colnames(data)
 fit <- rpart(troll~t_sent+created+followersCount+listedCount+statusesCount+favoritesCount+friendsCount+
                      lang+badwords+user_w+user_a+user_m + angry + imagedefault, data=data, method="class")
@@ -73,7 +74,9 @@ text(pfit, use.n=TRUE, all=TRUE, cex=.8)
 
 plot(fit, uniform=TRUE, 
      main="Regression Tree for Mileage ")
-text(fit, use.n=TRUE, all=TRUE, cex=.8)###
+text(fit, use.n=TRUE, all=TRUE, cex=.8)
+
+###
 #### LOGISTIC REGRESSION 
 ### 
 
@@ -105,41 +108,16 @@ summary(bestmod)
 plot(svmfit, data=data)
 
 ###
-#### FOREST
+#### FOREST - removed
 ### 
-troll~t_sent+created+followersCount+listedCount+statusesCount+favoritesCount+friendsCount+
-        lang+bdword+user_w+user_a+user_m + angry + imagedefault
 
-library(randomForest)
-fit_forest <- randomForest(as.factor(troll)~t_sent+created+followersCount+listedCount+
-        statusesCount+favoritesCount+friendsCount+angry+imagedefault+user_m+bdword+user_w+user_a, 
-                           data=data)
-fit_forest
-data$bdword
-
-print(fit_forest) # view results 
-importance(fit_forest) # importance of each predictor
 
 ###
-#### KNN
+#### KNN -removed
 ###
 
 
 
 ###
-#### CNN
+#### CNN -removed
 ###
-
-
-library(neuralnet)
-nn <- neuralnet(troll~t_sent+followersCount+year(created)+followersCount+listedCount+
-                        statusesCount+favoritesCount+friendsCount,
-                data=data,hidden=c(5,3),linear.output=T)
-summary(nn)
-
-nn$model.list
-
-
-
-
-?neuralnet

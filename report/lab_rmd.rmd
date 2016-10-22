@@ -13,7 +13,7 @@ In this project, we focused on identifying political trolls on Twitter, and area
 
 ## Data
 
-Usernames were collected from Twitter using both the Twitter API and web app, and data collection was focused on english users. Initial data collection consisted of searching twitter, via twitter API for users with tweets containing one of the two major political party candidates for president's twitter handles in the tweet text (@hillaryclinton or @therealdonaldtrump) on October 1st 2016 at 4:14:19 EST. Twitter API mechanics resulted in a mix of most recent tweets (up to the second), as well as 'hot' tweets that were somewhat recent and popular in terms of favorites and retweets. In total, 143 usernames were collected through this method. Later, from October 7th through October 14th, because of an apparent lack of trolls in the API generated users, manual user harvesting was conducted. This manual harvest consisted of browsing political figures tweets, in an attempt to find users responding whom are of interest. Once a list of usernames was collected, user's 10 most recent tweets as well as relevant tweet data (favorites, location, retweets, etc.) were collected as well as data associated with the account as a whole (friends, description, etc.).  
+Usernames were collected from Twitter using both the Twitter API and web app, and data collection was focused on english users. Initial data collection consisted of searching twitter, via twitter API for users with tweets containing one of the two major political party candidates for president's twitter handles in the tweet text (@hillaryclinton or @therealdonaldtrump) on October 1st 2016 at 4:14:19 EST. Twitter API mechanics resulted in a mix of most recent tweets (up to the second), as well as 'hot' tweets that were somewhat recent and popular in terms of favorites and retweets. In total, 143 usernames were collected through this method. Later, from October 7th through October 14th, because of an apparent lack of trolls in the API generated users, manual user harvesting was conducted. This manual harvest consisted of browsing political figures tweets, in an attempt to find users responding whom are of interest. After the collection period, 132 additional trolls were added for a total of ____.  Once a list of usernames was collected, user's 10 most recent tweets as well as relevant tweet data (favorites, location, retweets, etc.) were collected as well as data associated with the account as a whole (friends, description, etc.).  
 
 Trolls were defined as users with at least one of the 10 collected tweets which appeared to both:
   
@@ -42,20 +42,10 @@ par(old.par)
 
 par(mfrow=c(2, 2))
 sm.density.compare(data$t_sent, data$troll, xlab="Sentiment Score",col=c("blue", "red"), lwd=2)
-#legend(x="topleft", col = c("red", "blue"), c("Troll", "Not a Troll"),lty=c(1,1))
-#title(main="Average tweet sentiment")
 
 sm.density.compare(data$statusesCount, data$troll, xlab="status count",col=c("blue", "red"), lwd=2)
 sm.density.compare(data$followersCount, data$troll, xlab="followers count",col=c("blue", "red"), lwd=2)
 sm.density.compare(year(data$created), data$troll, xlab="year created",col=c("blue", "red"), lwd=2)
-
-# boxplot(statusesCount ~ troll, data=data, col="blue", xlab="Troll", ylab="number of statuses",
-#          log='y')
-# 
-# boxplot(followersCount+1 ~ troll, data=data, col="blue", xlab="Troll", ylab="number of followers",
-#         log='y')
-# 
-# boxplot(as.Date(data$created, format = "%m/%d/%y") ~ troll, data=data, col="blue", xlab="Troll", ylab="created")
 ```
   
 __Figure 1__ Density plots of common twitter metric in both troll and non-troll groups. Trolls are denoted by the red line while non-trolls are denoted by the blue line. 
@@ -71,7 +61,6 @@ Logistic regression models the probability of a user being a troll for each obse
 library(boot)
 fit <- rpart(troll~t_sent+created+followersCount+listedCount+statusesCount+favoritesCount+friendsCount+
                      lang+bdword+user_w+user_a+user_m + angry + imagedefault, data=data, method="class")
-
 
 ###
 pfit <- prune(fit, cp=fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"])
@@ -102,7 +91,7 @@ logistic_fit2 <- glm(troll~t_sent+followersCount+listedCount+favoritesCount+
                 badwords+user_m  + imagedefault, 
                      family = binomial(link = "logit"), data=data)
 logistic_fit2_cv <- cv.glm(data, logistic_fit2)
-logistic_fit2_cv$delta[2]
+#logistic_fit2_cv$delta[2]
 
 error_log1 <- mean((predict.glm(logistic_fit1, data,type="response") >= 0.5) == (data$troll == 1))
 error_log2 <- mean((predict.glm(logistic_fit2, data,type="response") >= 0.5) == (data$troll == 1))
@@ -133,7 +122,7 @@ Using a simple logistic regression only consisting of AFFIN sentimant analysis w
 
 ## Discussion 
 
-It was expected that the regression tree would be able to outperform the logistic regression as the relationship between covariates and being a troll seemed opaque at best and best modeled with the non-parametric method. However, as we saw, a simple logistic regression had a similar classification error rate as the regression tree and a model including additional important variables was able to outperform the regression tree. The main issue of this study was a lack of available data, particularly trolls. Although there were 273 observations, more would likely allow us to identify additional relationships and interactions between variables and troll status. In addition, future work should include identifying word n-grams which may allow us to gain additional insight beyond lexicons. n-grams are popular in computational linguistics as two words together in sequence contain additional information about the meaning of the sentence they are contained in compared to lexicon analysis of the same two words. In fact, word n-grams have been utilized to detect text meaning (Martin, et. al, 2000) in various settings. 
+It was expected that the regression tree would be able to outperform the logistic regression as the relationship between covariates and being a troll seemed opaque at best and best modeled with the non-parametric method. However, as we saw, a simple logistic regression had a similar classification error rate as the regression tree and a model including additional important variables was able to outperform the regression tree. The main issue of this study was a lack of available data, particularly trolls. Although there were 273 observations, more would likely allow us to identify additional relationships and interactions between variables and troll status. In addition, future work should include identifying word n-grams which may allow us to gain additional insight beyond lexicons. n-grams are popular in computational linguistics as two words together in sequence contain additional information about the meaning of the sentence they are contained in compared to lexicon analysis of the same two words. In fact, word n-grams have been utilized to detect text meaning (Martin, et. al, 2000) in various settings. In addition, we chose to 
 
 This study did shed light on strange phenomena of different classes of trolls. From our anecdotal experience, there seemed to be three main types of twitter trolls.
   

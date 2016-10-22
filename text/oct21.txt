@@ -1,3 +1,7 @@
 notes: why 10 tweets?; why troll if >= 1 troll tweets. how many tweets?
 c v may still have overfitting
 define arbitrary points
+To do:
+
+write up **** 
+1-2 figures, page of text, all data

@@ -5,7 +5,6 @@ library(readr); library(stringr); library(dplyr); library(tidytext)
 data <- read_csv('data/data1013.csv')
 
 
-
 tweet_words <- data %>% select(screenName, text1) %>%
         group_by(screenName) %>%
         unnest_tokens(word, text1) %>%
@@ -26,7 +25,6 @@ tweet_sentiment <- tweet_words %>%
 
 
 t_sent <- function(dat){
-        
         
         tweet_words <- dat %>%
                 group_by(screenName) %>%
@@ -92,15 +90,12 @@ nrc <- sentiments %>%
         filter(lexicon == "nrc") %>%
         dplyr::select(word, sentiment)
 
-tweet_words
-
 nrc_sent = tweet_words %>% inner_join(nrc)
 
 nrc_sent %>% group_by(sentiment,screenName) %>% summarize(n=n())
 
 bad = nrc_sent %>%  #mutate(hour = hour(created)) %>% 
         group_by(screenName) %>% summarize(angry = mean(sentiment=="anger" | sentiment=="fear" | sentiment =="disgust")) %>% ungroup()
-
 
 ###
 data <- data %>% mutate(t_sent = (t1_sent + t2_sent + t3_sent + t4_sent +
@@ -147,7 +142,7 @@ data$user_m10 <- mobile_user(data$statusSource10)
 
 data <- data %>% mutate(user_m = user_m1 + user_m2 + user_m3 + user_m4+ user_m5+ user_m6 +
                          user_m7 + + user_m8 +  user_m9 +  user_m10)
-?mean
+
 data$user_a1 <- automate_user(data$statusSource1)
 data$user_a2 <- automate_user(data$statusSource2)
 data$user_a3 <- automate_user(data$statusSource3)
@@ -197,7 +192,7 @@ tweet_dat2 <- mutate(tweet_dat, bdword = output %in% badwords)  %>%
         filter(bdword == TRUE) %>%
         summarize(n=n()) %>% 
         mutate(badwords = n) %>% select(screenName, badwords)
-data
+
 data <- full_join(data,tweet_dat2, by="screenName")
 data$badwords <- ifelse(is.na(data$badwords), 0, data$badwords)
 write_csv(data, "data/dataE.csv")
