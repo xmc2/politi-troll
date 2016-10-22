@@ -10,3 +10,8 @@ e1071
 stringr
 dplyr
 tidytext
+Matrix
+foreach
+glmnet
+printr
+knitr
