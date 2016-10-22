@@ -5,3 +5,7 @@ To do:
 
 write up **** 
 1-2 figures, page of text, all data
+
+Ensure that jeff can run the package:
+1.) make sure that the emoji converting works
+2.) make sure that the emoji dictionary function works
