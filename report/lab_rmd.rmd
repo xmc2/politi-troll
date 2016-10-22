@@ -30,9 +30,8 @@ Using data from the last ten tweets (inclusive of retweets), we were able to ass
 
 ```{r load_packages_data, warning=F, echo=FALSE, message=FALSE, cache=TRUE}
 library(readr); library(sm);library(ggplot2); library(rpart); library(boot); library(sm); library(lubridate); library(rpart.plot); library(rpart)
-library(e1071)
-setwd("/Users/Matthew/Desktop/term1/data_science/DataScienceProject/Data_Science_Project")
 
+setwd(file.path(".."))
 source('rscripts/editing.R')
 data <- read_csv("data/dataE.csv")
 ```
@@ -103,7 +102,7 @@ logistic_fit2 <- glm(troll~t_sent+followersCount+listedCount+favoritesCount+
                 badwords+user_m  + imagedefault, 
                      family = binomial(link = "logit"), data=data)
 logistic_fit2_cv <- cv.glm(data, logistic_fit2)
-#logistic_fit2_cv$delta[2]
+logistic_fit2_cv$delta[2]
 
 error_log1 <- mean((predict.glm(logistic_fit1, data,type="response") >= 0.5) == (data$troll == 1))
 error_log2 <- mean((predict.glm(logistic_fit2, data,type="response") >= 0.5) == (data$troll == 1))
@@ -134,13 +133,13 @@ Using a simple logistic regression only consisting of AFFIN sentimant analysis w
 
 ## Discussion 
 
-It was expected that the regression tree would be able to outperform the logistic regression as the relationship between covariates and being a troll seemed opaque at best, and best modeled with non-parametric method. However, as we saw, a simple logistic regression had a similar classification error rate as the regression tree and a model including additional important variables was able to outperform the regression tree. A main issue of this study was a lack of available data, particularly trolls. Although there were 273 observations, more would likely allow us to identify aditional relationships and interactions between variables and troll status. In addition, future work should include identifying character n-grams which may allow us to gain additional insight beyond 
+It was expected that the regression tree would be able to outperform the logistic regression as the relationship between covariates and being a troll seemed opaque at best and best modeled with the non-parametric method. However, as we saw, a simple logistic regression had a similar classification error rate as the regression tree and a model including additional important variables was able to outperform the regression tree. The main issue of this study was a lack of available data, particularly trolls. Although there were 273 observations, more would likely allow us to identify additional relationships and interactions between variables and troll status. In addition, future work should include identifying word n-grams which may allow us to gain additional insight beyond lexicons. n-grams are popular in computational linguistics as two words together in sequence contain additional information about the meaning of the sentence they are contained in compared to lexicon analysis of the same two words. In fact, word n-grams have been utilized to detect text meaning (Martin, et. al, 2000) in various settings. 
 
-This study did shed light onto a strange phenomena of different classes of trolls. From our anecdotal experience, there seemed to be three main types of twitter trolls.
+This study did shed light on strange phenomena of different classes of trolls. From our anecdotal experience, there seemed to be three main types of twitter trolls.
   
 * 'regular' users of twitter (students, professionals, personal accounts) whom occasionally say mean/emotionally charged things on twitter
   
-* bots: usually newly created, low tweet/follower/friend count whom seem to spew politically charged propaganda
+* bots: usually newly created, low tweet/follower/friend count who seem to spew politically charged propaganda
   
 * troll/fan pages: these accounts seem to be semi-autonomous as they respond to policial figures (@therealdonaldtrmp, @hillaryclinton) almost instantaneously while also seeming to be able to respond to certain accounts in a thought out manner. These accounts unlike the previous two have many tweets, were created long ago and have many followers. 
 
@@ -155,6 +154,8 @@ Thank you to http://unicode.org/emoji/charts/full-emoji-list.html for letting me
 ##References: 
 
 Hern, Alex. "Did Trolls Cost Twitter $3.5bn and Its Sale?" The Guardian. Guardian News and Media, 18 Oct. 2016. Web. 21 Oct. 2016.
+
+Martin, J. H., & Jurafsky, D. (2000). Speech and language processing. International Edition, 710.
 
 ## Packages
 
