@@ -13,3 +13,5 @@ tidytext
 Matrix
 foreach
 glmnet
+printr
+knitr
