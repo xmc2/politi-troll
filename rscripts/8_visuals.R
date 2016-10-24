@@ -46,11 +46,15 @@ train_set <- data[-test_obs,]
 ###
 #### REGRESSION TREES 
 ###
+weights = ifelse(data$troll == 1,2,1)
+
 
 colnames(data)
 fit <- rpart(troll~t_sent+created+followersCount+listedCount+statusesCount+favoritesCount+friendsCount+
-                     lang+badwords+user_w+user_a+user_m + angry + imagedefault, data=data, method="class")
-plotcp(fit)
+                     lang+bdword+user_w+user_a+user_m + angry + imagedefault, 
+             method = "class",
+             weights=weights,
+             data=data)
 rpart.plot(fit)
 
 ###
@@ -60,6 +64,8 @@ plotcp(pfit)
 
 summary(pfit)
 par(mfrow=c(1, 1))
+
+
 
 # plot the pruned tree 
 rpart.plot(pfit, type = 3,uniform=TRUE, 
@@ -76,11 +82,23 @@ plot(fit, uniform=TRUE,
      main="Regression Tree for Mileage ")
 text(fit, use.n=TRUE, all=TRUE, cex=.8)
 
+
+
+pred <- predict(fit, data) %>% as.data.frame() %>% cbind(data$troll) %>% as.tbl()
+pred$p1 <- ifelse(pred[,2] > 0.5,1,0)
+colnames(pred) <- c("prob0", "prob1", "troll", "predicted")
+
+tree_err_rate<-1-mean(pred[,3] == pred[,4])
+mean(pred[pred$troll == 1,]$troll == pred[pred$troll == 1,]$predicted)
+mean(pred[pred$troll == 0,]$troll == pred[pred$troll == 0,]$predicted)
+
+
 ###
 #### LOGISTIC REGRESSION 
 ### 
 
-logistic_fit1 <- glm(troll ~ t_sent, family = binomial(link = "logit"), data=data)
+logistic_fit1 <- glm(troll ~ t_sent, family = binomial(link = "logit"), 
+                     data=data)
 logistic_fit1_cv <- cv.glm(data, logistic_fit1)
 logistic_fit1_cv$delta[1]
 
