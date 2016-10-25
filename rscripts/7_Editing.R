@@ -197,3 +197,7 @@ data <- full_join(data,tweet_dat2, by="screenName")
 data$badwords <- ifelse(is.na(data$badwords), 0, data$badwords)
 write_csv(data, "data/dataE.csv")
 
+# clean up, clean up
+
+rm(AFINN, bad, nrc, nrc_sent, tweet_dat, tweet_dat2, tweet_sentiment, tweet_words,
+   badwords)
