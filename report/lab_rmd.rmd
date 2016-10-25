@@ -5,8 +5,10 @@ date: "October 23, 2016"
 output: pdf_document
 ---
 
-```{r load_packages_data, warning=F, echo=FALSE, message=FALSE, cache=T, results='hide',include=FALSE}
-library(readr); library(sm);library(ggplot2); library(rpart); library(boot); library(sm); library(lubridate); library(rpart.plot); library(rpart); library(knitr)
+```{r load_packages_data, warning=F, echo=FALSE, message=FALSE, cache=T, results='hide',include=FALSE, error=F}
+library(readr); library(sm);library(ggplot2); library(rpart); library(boot); library(sm); library(lubridate); library(rpart.plot); library(rpart); library(knitr); library(caret)
+```
+```{r setwd_source, warning=F, echo=FALSE, message=FALSE, cache=T, results='hide', include=FALSE, error=F}
 
 setwd(file.path(".."))
 #source('rscripts/editing.R')
@@ -21,7 +23,7 @@ lp <- function(x){
 
 ```
 
-```{r trees, echo=FALSE, cache=T, message=FALSE, dependson = "load_packages_data"}
+```{r trees, echo=FALSE, cache=T, message=FALSE, dependson = "load_packages_data", warning = F, warning=F}
 library(boot)
 set.seed(12)
 
@@ -52,12 +54,12 @@ specificity <- mean(pred[pred$troll == 0,]$troll == pred[pred$troll == 0,]$predi
 
 ```
 
-```{r logist, echo=FALSE, cache=T, message=FALSE, cache=F, dependson = "load_packages_data"}
+```{r logist, echo=FALSE, cache=T, message=FALSE, cache=F, dependson = "load_packages_data", , warning=F}
 ###
 #### LOGISTIC REGRESSION 
 ### 
 
-library(glmnet)
+library(glmnet); library(boot)
 
 logistic_fit1 <- glm(troll ~ t_sent, family = binomial(link = "logit"), data=data)
 logistic_fit1_cv <- cv.glm(data, logistic_fit1, K = 10)
@@ -74,7 +76,7 @@ error_log2 <- mean((predict.glm(logistic_fit2, data,type="response") >= 0.5) == 
 ```
 ## Introduction
 
-Internet trolls are considered a menace in nearly all online communities as they strive to generate emotional responses and cause disagreements between users. Motivations behind these users are unclear, but some social scientists suspect that a strange phenomenon known as the "disinhibition effect" may be to blame. Masked behind the apparent anonymity provided by many forms, sites, and the internet in general, social reservations that facilitate normal, face-to-face conversations can disappear, resulting in sometimes wild and rude behavior. This 'troll behavior' can stretch from simply posting the same status repeatedly to annoy and clog streams of information to violent threats and many 'things' in between. The effect of these trolls on Twitter, in particular, has been linked to many popular users leaving the platform entirely. The damage trolls may cause moves further than individuals, with Twitter's troll problem considered to be partially responsible its recent loss of 35 billion in market capitalization according to some analysts (Hern, 2016). In this project, we focused on identifying political trolls on Twitter, an area considered to be particularly saturated with such users. 
+Internet trolls are considered a menace in nearly all online communities as they strive to generate emotional responses and cause disagreements between users. Motivations behind these users are unclear, but some social scientists suspect that a strange phenomenon known as the "disinhibition effect" may be to blame. Masked behind the apparent anonymity provided by many forms, sites, and the internet in general, social reservations that facilitate normal, face-to-face conversations can disappear, resulting in sometimes wild and rude behavior. This 'troll behavior' can stretch from simply posting the same status repeatedly to annoy and clog streams of information to violent threats and many 'things' in between. The effect of these trolls on Twitter, in particular, has been linked to many popular users leaving the platform entirely. The damage trolls may cause moves further than individuals however, with Twitter's troll problem considered to be partially responsible its recent loss of 35 billion in market capitalization (Hern, 2016). In this project, we focused on identifying political trolls on Twitter, an area considered to be particularly saturated with such users. 
 
 
 ## Data
@@ -122,25 +124,18 @@ sm.density.compare(year(data$created), data$troll, xlab="year created",col=c("bl
 __Figure 1__ Smoothed density plots of common twitter metrics in both troll and non-troll groups. Trolls are denoted by the red line while non-trolls are denoted by the blue line. Distribution of AFFIN sentiment score and year of account creation appear to potentially be different in the two groups while there is no noticible difference in follower or status count. 
 
 
-We focused on three models to predict troll status: a simple logistic regression, a 'full' logistic regression model consisting of multiple covariates as well as a classification trees. In order to assess model fit, 20% of the data was randomly partitioned to a designated 'testing' data set comprising of `r nrow(test)` observations, of which `r sum(test$troll)` are trolls. The remaining `r nrow(train)` users (including `r sum(test$train)` trolls) were used to construct all models and such models were tested by predicting the status of the testing set.
+We focused on three models to predict troll status: a simple logistic regression, a 'full' logistic regression model with automatic variable selection as well as a classification tree. In order to assess model fit, 20% of the data was randomly partitioned to a designated 'testing' data set comprising of `r nrow(test)` observations, of which `r sum(test$troll)` are trolls. The remaining `r nrow(train)` users (including `r sum(test$train)` trolls) were used to construct all models which were tested by predicting the troll status of the test set.
 
 Classification and regression trees (CART) are a group of supervised machine learning methods which construct decision tree models utilizing observed data. Unlike other popular methods for classification or regression, CART methods do not produce global models, where a single predictive formula is employed to make decisions or predictions over all observations (James et al., 2013). Instead, CART methods break down the feature space containing the observations into small subspaces (called recursive partitioning) until the subspaces can be represented by relatively simple models. Benefits of CART methods include its high level of interpretability, automatic variable selection, and ease of visualization. 
 
-A classification tree was grown using the rpart package in R. Because of the unballanced dataset, we opted to weight the samples by the reciprical of the proportion of our data in each class (troll or non-troll). The classification tree's nodes were pruned back by ruducing the number of nodes to minimize the 10-fold cross-validated error rate (Figure 2). 
+A classification tree was grown using the rpart package in R. Because of the unballanced dataset, we opted to weight the observations as such: non-troll observaitons were given a weight of 1 while troll observations were weighted as the ratio of non-trolls:trolls in the training set, `r round( mean(1-train$troll)/mean(train$troll), 3)`. The classification tree's nodes were pruned back by ruducing the number of nodes to minimize the 10-fold cross-validated error rate (Figure 2). 
 
-Logistic regression models the probability of a user being a troll for each observation $i$ ($p_i$) by treating the logit function, $log(\frac{p_i}{1-p_i})$ as a linear function of the covariates. In this study, a major limitation may be logistic regression's inability to capture non-linear trends associated with the covariates. However, this limitation can be partially overcome by the addition of splines or interaction terms. First, we examined a simple logistic regression only consisting of AFFIN sentiment, to better understand the analysis and found a prediction error of `r 1-round(error_log1, 2)`. In addition, we see that without controlling for any other covariates, for each 1 unit decrease in average AFINN sentiment score, expected odds of being a troll increased by a factor of `r (-summary(logistic_fit1)$coeff[2,1])`. Another logistic model was fit, forward selection to minimize 10-fold cross validation. We ended with a model utilizing average AFINN sentiment score, the number of followers, number of lists the user is on, if the user is on mobile, if the user is using the 'default egg' photo, and the number of friends (people following) (table 1).
-
-
-
-
-
-
-
+Logistic regression models the probability of a user being a troll for each observation $i$ ($p_i$) by treating the logit function, $log(\frac{p_i}{1-p_i})$ as a linear function of the covariates. In this study, a major limitation may be logistic regression's inability to capture non-linear trends associated with the covariates. However, this limitation can be partially overcome by the addition of splines or interaction terms. First, we examined a simple logistic regression only consisting of AFFIN sentiment, to better understand the analysis and found a prediction error of `r 1-round(error_log1, 2)`. In addition, we see that without controlling for any other covariates, for each 1 unit decrease in average AFINN sentiment score, expected odds of being a troll increased by a factor of `r (-summary(logistic_fit1)$coeff[2,1])`. Another logistic model was fit, utilizing stepwise forward selection, increaseing the number of covariates untill weighted cv-10 error rates decreased. This method yielded  a model utilizing average AFINN sentiment score, the number of followers, number of lists the user is on, if the user is on mobile, if the user is using the 'default egg' photo, and the number of friends (people following) (table 1).
 
 
 ## Results
 
-
+Both the simple logistic and full logistic models had error rates of `r round(log1_err_rate, 3)` and `r round(log2_err_rate, 3)` respectively with the simple logistic model having a slightly higher sensitivity but lower specificity compared with the full model. 
 
 
 ```{r printing_table , echo=FALSE, cache=T, message=FALSE}
@@ -177,7 +172,8 @@ rpart.plot(pfit, type = 3, uniform=TRUE,
 
 
 
-```{r}
+```{r, cache=T, echo=F}
+require(knitr)
 x1<-c(log1_err_rate, log1_sens, log1_spec, log1_auc)
 x2<-c(log2_err_rate, log2_sens, log2_spec,log2_auc)
 x3<-c(tree_err_rate, tree_sens, tree_spec, tree_auc)
@@ -187,7 +183,7 @@ colnames(x_all) <- c("Error Rate", "Sensitivity", "Specificity", "AUC")
 kable(x_all)
 ```
 
-__Table 2__ Comparison of all three models. 
+__Table 2__ raw error rate, Sensitivity, Specificity, and "AUC" comparison of all three models. 
 
 
 
@@ -195,8 +191,10 @@ __Table 2__ Comparison of all three models.
 
 ## Discussion 
 
-### results
-It was expected that the regression tree would be able to outperform the logistic regression as the relationship between covariates and troll status seem opaque at best and would likely be best modeled with a non-parametric method. As we saw, the classification tree was in fact able to outperform the logistic regression models with respect to 10-fold cross-validation prediction error rate and recorded a sensitivity of `r round(sensitivity, 2)` and a specificity of `r round(specificity,2)`.
+### Results
+It was expected that the regression tree would be able to outperform the logistic regression as the relationship between covariates and troll status seem opaque at best and would likely be best modeled with a non-parametric method (table 2). As we saw, the classification tree was in fact able to outperform the logistic regression models with respect to error rate, sensitivity and AUC however, the specificity results were abysmal with a value of 0.55, suggesting that our model was barely better than flipping a coin for classification of non-trolls, and much worse in this regard than either of the logistic regression models (table 2).
+
+logistic regrtession  `r round(log1_err_rate, 3)` to `r round(log2_err_rate, 3)`, while increasing the sensitivity (from `r round(log1_sens, 3)` to `r round(log2_sens, 3)`), specificty (from `r round(log1_spec, 3)` to `r round(log2_spec, 3)`), and the AUC (from `r round(log1_auc, 3)` to `r round(log2_auc, 3)`).
 
 This study did shed light on a strange phenomena of different classes of trolls. From our anecdotal experience, there seemed to be three types or classes of twitter trolls.
   
@@ -206,14 +204,17 @@ This study did shed light on a strange phenomena of different classes of trolls.
   
 * troll/fan pages: these accounts seem to be semi-autonomous as they respond to policial figures (@therealdonaldtrmp, @hillaryclinton) almost instantaneously while also being able to respond to certain accounts in a thought out manner. These accounts have many tweets, were created long ago and have many followers. In fact, Fortune, POLITICO and the New York Magazine all have run stories of these 'bot armies'.
 
-### limitations
+Surprisingly, many of the covaraites did not make the final model in either the logisic or classification tree case. These included the anger score, bot users, emoji score, etc. This could be because of a lack of relationship between these variables and troll status, or it could be due to the lack of data to identify such nuanced features.
+
+
+### Limitations
 The main limitation of this study was a lack of available data, particularly trolls. Although there were `r nrow(data)` observations there were only `r sum(data$troll)` trolls in our dataset, more would likely allow us to identify additional relationships and interactions between variables and troll status. In addition, there is the possibility for human error as a single person classified all tweets. This error could come from keystroke error or implicit political bias. Political bias could be difficult to identify and overcome where beliefs of what actually occured could alter whether a statement is either inflamitory or extraneous. A good example of this are statements such as "Bill Clinton is a rapist", which were classified as both inflamitory and extraneous, but to an individual whom believes that the statement is true, would likely not view it as extraneous as it is simply stating the truth. 
 
 ### Generalization
 It is plausible that these models could generalize to other spaces within twitter or even outside of the social media site where trolling is a serious issue. However, the model relies heavily on non-text covariates such as friends, dates, and followers and applying this model to,  an anonymous online form would likely be less effective, as this user data would be missing.  the models here may not generalize to  sites where the long posts are common as tweets are capped at 140 characters, however potentially averaging sentiments or bad words (ie. average sentiment per 100 characters or 10 words) may possibly be effective.
 
-### future work
-In the future, it would be beneficial to further optimize tuning parameters associated with these models and inspect how other algorithms perform, particularly convolutional neural networks as well as support vector machines which may be able to identify aditional hard to see relationships in the data resulting in better prediction accuracy. In addition, future work should include identifying word n-grams which may allow us to gain additional insight beyond lexicons. n-grams are popular in computational linguistics as two words in sequence contain additional information about the meaning of the sentence compared to lexicon analysis of the same two words. Future would could focus on classifiny individual tweets as troll / non-troll tweets or even non-binary degrees of 'troll', for instance, classifying three types of trolls mentioned earlier in the discussion.
+### Future Work
+In the future, it would be beneficial to further optimize tuning parameters associated with these models and inspect how other algorithms perform, particularly convolutional neural networks as well as support vector machines which may be able to identify aditional hard to see relationships in the data resulting in better prediction accuracy. In addition, future work should include identifying word n-grams which may allow us to gain additional insight beyond lexicons. n-grams are popular in computational linguistics as two words in sequence contain additional information about the meaning of the sentence compared to lexicon analysis of the same two words. Future would could focus on classifiny individual tweets as troll / non-troll tweets or even non-binary degrees of 'troll', for instance, classifying three types of trolls mentioned earlier in the discussion. It would also be interesting to run a latent class analysis on the variables 
 
 
 
