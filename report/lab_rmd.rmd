@@ -1,81 +1,22 @@
 ---
 title: "Politi-troll"
 author: "Matt Cole"
-date: "October 23, 2016"
+date: "October 25, 2016"
 output: pdf_document
-subtitle: Identifying political trolls on Twitter
+subtitle: "Identifying political trolls on Twitter"
 ---
 
 ```{r load_packages_data, warning=F, echo=FALSE, message=FALSE, cache=T, results='hide',include=FALSE, error=F}
 library(readr); library(sm);library(ggplot2); library(rpart); library(boot); library(sm); library(lubridate); library(rpart.plot); library(rpart); library(knitr); library(caret)
 ```
-```{r setwd_source, warning=F, echo=FALSE, message=FALSE, cache=T, results='hide', include=FALSE, error=F}
+```{r setwd_source, warning=F, echo=FALSE, message=FALSE, cache=T, results='hide', include=FALSE, error=F, dependson='rscripts/8_visuals.r'}
 
 setwd(file.path(".."))
-#source('rscripts/editing.R')
+#source('rscripts/7_editing.R')
 source('rscripts/8_visuals.r')
-data <- read_csv("data/MC_processed_data.csv")
-
-lp <- function(x){
-        y <- x/(1-x)
-        y <- exp(y)
-        return(y)
-}
-
+#data <- read_csv("data/MC_processed_data.csv")
 ```
 
-```{r trees, echo=FALSE, cache=T, message=FALSE, dependson = "load_packages_data", warning = F, warning=F}
-library(boot)
-set.seed(12)
-
-fit <- rpart(troll~t_sent+created+followersCount+listedCount+statusesCount+favoritesCount+friendsCount+
-                     lang+bdword+user_w+user_a+user_m + angry + imagedefault, 
-              method = "class",
-             weights = ifelse(data$troll == 1,2,1),
-             data=data)
-
-###
-pfit <- prune(fit, cp=fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"])
-
-#summary(pfit)
-par(mfrow=c(1, 1))
-
-# plot the pruned tree 
-
-
-#pfit$cptable
-
-pred <- predict(fit, data) %>% as.data.frame() %>% cbind(data$troll) %>% as.tbl()
-pred$p1 <- ifelse(pred[,2] > 0.5,1,0)
-colnames(pred) <- c("prob0", "prob1", "troll", "predicted")
-
-tree_err_rate<-1-mean(pred[,3] == pred[,4])
-sensitivity<-mean(pred[pred$troll == 1,]$troll == pred[pred$troll == 1,]$predicted)
-specificity <- mean(pred[pred$troll == 0,]$troll == pred[pred$troll == 0,]$predicted)
-
-```
-
-
-```{r logist, echo=FALSE, cache=T, message=FALSE, cache=F, dependson = "load_packages_data", , warning=F}
-###
-#### LOGISTIC REGRESSION 
-### 
-
-library(glmnet); library(boot)
-
-logistic_fit1 <- glm(troll ~ t_sent, family = binomial(link = "logit"), data=data)
-logistic_fit1_cv <- cv.glm(data, logistic_fit1, K = 10)
-#logistic_fit1_cv$delta[1]
-
-logistic_fit2 <- glm(troll~t_sent+followersCount+listedCount+favoritesCount+
-                badwords+user_m  + imagedefault, 
-                     family = binomial(link = "logit"), data=data)
-logistic_fit2_cv <- cv.glm(data, logistic_fit2)
-#logistic_fit2_cv$delta[2]
-
-error_log1 <- mean((predict.glm(logistic_fit1, data,type="response") >= 0.5) == (data$troll == 1))
-error_log2 <- mean((predict.glm(logistic_fit2, data,type="response") >= 0.5) == (data$troll == 1))
-```
 ## Introduction
 
 Internet trolls are considered a menace in nearly all online communities as they strive to generate emotional responses and cause disagreements between users (Stein, 2016). Motivations behind these users are unclear, but some social scientists suspect that a strange phenomenon known as the "disinhibition effect" may be to blame (Suler, 2005). Masked behind the apparent anonymity provided by many forms, sites, and the internet in general, social reservations that facilitate normal, face-to-face conversations can disappear, resulting in sometimes wild and rude behavior (Suler, 2005). This 'troll behavior' can stretch from simply posting the same status repeatedly to annoy and clog streams of information to violent threats and many 'things' in between. The effect of these trolls on Twitter, in particular, has been linked to many popular users leaving the platform entirely (Kim, 2016; Stein, 2016). The damage trolls may cause can affect more than just individuals however, with Twitter's troll problem considered to be partially responsible for Twitter's recent loss of 35 billion in market capitalization as potential company aquierers have backed out from making deals while popular users have left the platform because of trolling (Hern, 2016; Kim, 2016). While some trolls have made threats or otherwise broken laws, many have simply are an annoyance to both other users as well as the site in general, resulting in a loss of userbase. Because trolls are a neusance, it would be benificial to censor, block, or ban such users before they could conduct damage. In this project, we focused on identifying political trolls on Twitter, an area considered to be particularly saturated with such users. 
@@ -126,13 +67,13 @@ sm.density.compare(year(data$created), data$troll, xlab="date created",col=c("bl
 __Figure 1__ Smoothed density plots of common twitter metrics in both troll and non-troll groups. Trolls are denoted by the red line while non-trolls are denoted by the blue line. Distribution of AFINN sentiment score and year of account creation appear to potentially be different in the two groups while there is no noticeable difference in follower or status count. 
 
 
-We focused on three models to predict troll status: a simple logistic regression, a 'full' logistic regression model with automatic variable selection as well as a classification tree. In order to assess model fit, 20% of the data was randomly partitioned to a designated 'testing' data set comprising of `r nrow(test)` observations, of which `r sum(test$troll)` are trolls. The remaining `r nrow(train)` users (including `r sum(test$train)` trolls) were used to construct all models which were tested by predicting the troll status of the test set.
+We focused on three models to predict troll status: a simple logistic regression, a 'full' logistic regression model with automatic variable selection as well as a classification tree. In order to assess model fit, 20% of the data was randomly partitioned to a designated 'testing' data set comprising of `r nrow(test)` observations, of which `r sum(test$troll)` are trolls. The remaining `r nrow(train)` users (including `r sum(test$troll)` trolls) were used to construct all models which were tested by predicting the troll status of the test set.
 
 Classification and regression trees (CART) are a group of supervised machine learning methods which construct decision tree models utilizing observed data. Unlike other popular methods for classification or regression, CART methods do not produce global models, where a single predictive formula is employed to make decisions or predictions over all observations (James et al., 2013). Instead, CART methods break down the feature space containing the observations into small subspaces (called recursive partitioning) until the subspaces can be represented by relatively simple models. Benefits of CART methods include its high level of interpretability, automatic variable selection, and ease of visualization. 
 
 A classification tree was grown using the rpart package in R. Because of the unbalanced data set, we opted to weight the observations as such: non-troll observations were given a weight of 1 while troll observations were weighted as the ratio of non-trolls:trolls in the training set, `r round( mean(1-train$troll)/mean(train$troll), 3)`. The classification tree's nodes were pruned back by reducing the number of nodes to minimize the 10-fold cross-validated error rate (Figure 2). 
 
-Logistic regression models the probability of a user being a troll for each observation $i$ ($p_i$) by treating the logit function, $log(\frac{p_i}{1-p_i})$ as a linear function of the covariates. In this study, a major limitation may be logistic regression's inability to capture non-linear trends associated with the covariates. However, this limitation can be partially overcome by the addition of splines or interaction terms. First, we examined a simple logistic regression only consisting of AFINN sentiment, to better understand the analysis and found a prediction error of `r 1-round(error_log1, 2)`. In addition, we see that without controlling for any other covariates, for each 1 unit decrease in average AFINN sentiment score, expected odds of being a troll increased by a factor of `r (-summary(logistic_fit1)$coeff[2,1])`. Another logistic model was fit, utilizing stepwise forward selection, increasing the number of covariates until weighted CV-10 error rates decreased. This method yielded  a model utilizing average AFINN sentiment score, the number of followers, number of lists the user is on, if the user is on mobile, if the user is using the 'default egg' photo, and the number of friends (people following) (table 1).
+Logistic regression models the probability of a user being a troll for each observation $i$ ($p_i$) by treating the logit function, $log(\frac{p_i}{1-p_i})$ as a linear function of the covariates. In this study, a major limitation may be logistic regression's inability to capture non-linear trends associated with the covariates. However, this limitation can be partially overcome by the addition of splines or interaction terms. First, we examined a simple logistic regression only consisting of AFINN sentiment, to better understand the analysis and found a prediction error of `r 1-round(log1_err_rate, 2)`. In addition, we see that without controlling for any other covariates, for each 1 unit decrease in average AFINN sentiment score, expected odds of being a troll increased by a factor of `r (-summary(logistic_fit1)$coeff[2,1])`. Another logistic model was fit, utilizing stepwise forward selection, increasing the number of covariates until weighted CV-10 error rates decreased. This method yielded  a model utilizing average AFINN sentiment score, the number of followers, number of lists the user is on, if the user is on mobile, if the user is using the 'default egg' photo, and the number of friends (people following) (table 1).
 
 
 ## Results
@@ -142,7 +83,7 @@ Both the simple logistic and full logistic models had error rates of `r round(lo
 
 ```{r printing_table , echo=FALSE, cache=T, message=FALSE}
 library(printr); library(knitr); require(base)
-x <- as.data.frame(round(summary(log2)$coeff,5))
+x <- as.data.frame(summary(log2)$coeff,5)
 rownames(x) <- c("Intercept",
                  "Average Tweet Sentiment (AFINN)",
                  "Follwers",
@@ -150,15 +91,20 @@ rownames(x) <- c("Intercept",
                  "Mobile User (binary)",
                  "Default Image (binary)",
                  "Number of Friends")
-kable(x, digits = 3, caption = 'Logistic regression coefficients')
-#exp(confint(logistic_fit2))
+x$Low <- x$Estimate - 1.96*x$`Std. Error`
+x$High <- x$Estimate + 1.96*x$`Std. Error`
+x <- x %>%
+        dplyr::select(Estimate, Low, High) %>%
+        exp()
+kable(x, digits = 4, caption = 'Logistic regression coefficients')
 ```
   
 __Table 1__ exponentiated Logistic regression coefficients. 
 
-For our classification tree, We found a CV prediction error rate of `r round(tree_err_rate,3)`, sensitivity of `r round(sensitivity,3)`, specificity of `r round(specificity, 3)`, and a AUC of `r round(tree_auc, 3)` (figure 1, table 2). This showed a considerably higher degree of accuracy compared with the logistic regression models that were produced. 
+For our classification tree, We found a CV prediction error rate of `r round(tree_err_rate,3)`, sensitivity of `r round(tree_sens,3)`, specificity of `r round(tree_spec, 3)`, and a AUC of `r round(tree_auc, 3)` (figure 1, table 2). This showed a considerably higher degree of accuracy compared with the logistic regression models that were produced. 
 
 ```{r echo=FALSE, cache=T, message=FALSE, dependson="trees"}
+par(mfrow=c(1, 1))
 rpart.plot(pfit, type = 3, uniform=TRUE, 
      main="Pruned Classification Tree for Trolls", digits=2, tweak =1)
 
