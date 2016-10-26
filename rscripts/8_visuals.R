@@ -3,14 +3,16 @@ library(ggplot2); library(rpart); library(boot); library(sm); library(lubridate)
 library(e1071); require(dplyr); library(pROC)
 
 source('rscripts/7_editing.R')
-set.seed(100)
+set.seed(10)
 
-#### EXPLORE
+data$followersCount0 <- data$followersCount / 10
+data$listedCount0 <- data$listedCount / 10
+data$friendsCount0 <- data$friendsCount / 10
 
 ### define a training and a testing set
 test <- sample_frac(data,0.20)
 train <- anti_join(data,test)
-# 
+####
 # hist(data[data$troll == T, ]$t_sent, col="blue", xlab="Troll", ylab="sentiment score",
 #         main="most recent tweet")
 # plot(density(data[data$troll == T, ]$t_sent, bw=0.25))
@@ -56,7 +58,7 @@ rpart.plot(fit)
 ###
 pfit <- prune(fit, cp=fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"])
 # printcp(pfit)
-# plotcp(pfit)
+plotcp(pfit)
 
 # summary(pfit)
 # par(mfrow=c(1, 1))
@@ -64,8 +66,8 @@ pfit <- prune(fit, cp=fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"])
 
 
 # plot the pruned tree 
-# rpart.plot(pfit, type = 3,uniform=TRUE, 
-#      main="Pruned Classification Tree for Troll", digits=2, tweak =1.5)
+rpart.plot(pfit, type = 3,uniform=TRUE, 
+      main="Pruned Classification Tree for Troll", digits=2, tweak =1.5)
 # pfit$cptable
 
 
@@ -102,7 +104,9 @@ plot(roc(log1_pred$troll, log1_pred$prob1))
 require(caret)
 weights2 = ifelse(train$troll == 1,2,1)
 
-log2 <- train(as.factor(troll)~t_sent+followersCount+listedCount+user_m+imagedefault+friendsCount, 
+
+log2 <- train(as.factor(troll)~t_sent+followersCount0+listedCount0+user_m+imagedefault+
+                      friendsCount0, 
       data=train,
       weights=weights2,
       method="glm", 

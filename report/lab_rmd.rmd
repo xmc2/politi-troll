@@ -9,6 +9,7 @@ subtitle: "Identifying political trolls on Twitter"
 ```{r load_packages_data, warning=F, echo=FALSE, message=FALSE, cache=T, results='hide',include=FALSE, error=F}
 library(readr); library(sm);library(ggplot2); library(rpart); library(boot); library(sm); library(lubridate); library(rpart.plot); library(rpart); library(knitr); library(caret)
 ```
+
 ```{r setwd_source, warning=F, echo=FALSE, message=FALSE, cache=T, results='hide', include=FALSE, error=F, dependson='rscripts/8_visuals.r'}
 
 setwd(file.path(".."))
@@ -59,11 +60,13 @@ par(mfrow=c(2, 2))
 
 sm.density.compare(data$t_sent, data$troll, xlab="Sentiment Score",col=c("blue", "red"), lwd=2)
 
-sm.density.compare(data$statusesCount, data$troll, xlab="status count",col=c("blue", "red"), lwd=2)
-sm.density.compare(data$followersCount, data$troll, xlab="followers count",col=c("blue", "red"), lwd=2)
-sm.density.compare(year(data$created), data$troll, xlab="date created",col=c("blue", "red"), lwd=2)
+sm.density.compare(data$statusesCount, data$troll, xlab="Status Count",col=c("blue", "red"), lwd=2)
+sm.density.compare(data$followersCount, data$troll, xlab="Followers Count",col=c("blue", "red"), lwd=2)
+plot(year(data$created), data$troll)
 ```
-  
+
+
+
 __Figure 1__ Smoothed density plots of common twitter metrics in both troll and non-troll groups. Trolls are denoted by the red line while non-trolls are denoted by the blue line. Distribution of AFINN sentiment score and year of account creation appear to potentially be different in the two groups while there is no noticeable difference in follower or status count. 
 
 
@@ -73,7 +76,7 @@ Classification and regression trees (CART) are a group of supervised machine lea
 
 A classification tree was grown using the rpart package in R. Because of the unbalanced data set, we opted to weight the observations as such: non-troll observations were given a weight of 1 while troll observations were weighted as the ratio of non-trolls:trolls in the training set, `r round( mean(1-train$troll)/mean(train$troll), 3)`. The classification tree's nodes were pruned back by reducing the number of nodes to minimize the 10-fold cross-validated error rate (Figure 2). 
 
-Logistic regression models the probability of a user being a troll for each observation $i$ ($p_i$) by treating the logit function, $log(\frac{p_i}{1-p_i})$ as a linear function of the covariates. In this study, a major limitation may be logistic regression's inability to capture non-linear trends associated with the covariates. However, this limitation can be partially overcome by the addition of splines or interaction terms. First, we examined a simple logistic regression only consisting of AFINN sentiment, to better understand the analysis and found a prediction error of `r 1-round(log1_err_rate, 2)`. In addition, we see that without controlling for any other covariates, for each 1 unit decrease in average AFINN sentiment score, expected odds of being a troll increased by a factor of `r (-summary(logistic_fit1)$coeff[2,1])`. Another logistic model was fit, utilizing stepwise forward selection, increasing the number of covariates until weighted CV-10 error rates decreased. This method yielded  a model utilizing average AFINN sentiment score, the number of followers, number of lists the user is on, if the user is on mobile, if the user is using the 'default egg' photo, and the number of friends (people following) (table 1).
+Logistic regression models the probability of a user being a troll for each observation $i$ ($p_i$) by treating the logit function, $log(\frac{p_i}{1-p_i})$ as a linear function of the covariates. In this study, a major limitation may be logistic regression's inability to capture non-linear trends associated with the covariates. However, this limitation can be partially overcome by the addition of splines or interaction terms. First, we examined a simple logistic regression only consisting of AFINN sentiment, to better understand the analysis and found a prediction error of `r 1-round(log1_err_rate, 2)` in the testing group. In addition, we see that without controlling for any other covariates, for each 1 unit decrease in average AFINN sentiment score, expected odds of being a troll increased by a factor of `r (-summary(logistic_fit1)$coeff[2,1])`. Another logistic model was fit, utilizing stepwise forward selection, increasing the number of covariates until weighted CV-10 error rates decreased. This method yielded  a model utilizing average AFINN sentiment score, the number of followers, number of lists the user is on, if the user is on mobile, if the user is using the 'default egg' photo, and the number of friends (people following) (table 1).
 
 
 ## Results
@@ -101,7 +104,7 @@ kable(x, digits = 4, caption = 'Logistic regression coefficients')
   
 __Table 1__ exponentiated Logistic regression coefficients. 
 
-For our classification tree, We found a CV prediction error rate of `r round(tree_err_rate,3)`, sensitivity of `r round(tree_sens,3)`, specificity of `r round(tree_spec, 3)`, and a AUC of `r round(tree_auc, 3)` (figure 1, table 2). This showed a considerably higher degree of accuracy compared with the logistic regression models that were produced. 
+For our classification tree, We found a CV prediction error rate of `r round(tree_err_rate,3)`, sensitivity of `r round(tree_sens,3)`, specificity of `r round(tree_spec, 3)`, and a AUC of `r round(tree_auc, 3)`  in the testing group (figure 1, table 2). This showed a considerably higher degree of accuracy compared with the logistic regression models that were produced. 
 
 ```{r echo=FALSE, cache=T, message=FALSE, dependson="trees"}
 par(mfrow=c(1, 1))
@@ -158,6 +161,8 @@ Surprisingly, many of the covaraites did not make the final model in either the 
 ### Limitations
 The main limitation of this study was a lack of available data, particularly trolls. Although there were `r nrow(data)` observations there were only `r sum(data$troll)` trolls in our dataset, more would likely allow us to identify additional relationships and interactions between variables and troll status. In addition, there is the possibility for human error as a single person classified all tweets. This error could come from keystroke error or implicit political bias. Political bias could be difficult to identify and overcome where beliefs of what actually occurred could alter whether a statement is either inflammatory or extraneous. A good example of this are statements such as "Bill Clinton is a rapist", which were classified as both inflammatory and extraneous, but to an individual whom believes that the statement is true, would likely not view it as extraneous as it is simply stating the truth. 
 
+
+
 ### Generalization
 It is plausible that these models could generalize to other spaces within twitter or even outside of the social media site where trolling is a serious issue. However, the model relies heavily on non-text covariates such as friends, dates, and followers and applying this model to,  an anonymous online form would likely be less effective, as this user data would be missing.  the models here may not generalize to  sites where the long posts are common as tweets are capped at 140 characters, however potentially averaging sentiments or bad words (ie. average sentiment per 100 characters or 10 words) may possibly be effective.
 
@@ -167,7 +172,7 @@ It is plausible that these models could generalize to other spaces within twitte
 
 ### Future Work
 In the future, it would be beneficial to further optimize tuning parameters associated with these models and inspect how other algorithms perform, particularly convolutional neural networks as well as support vector machines which may be able to identify additional hard to see relationships in the data resulting in better prediction accuracy. In addition, future work should include identifying word n-grams which may allow us to gain additional insight beyond lexicons. n-grams are popular in computational linguistics as two words in sequence contain additional information about the meaning of the sentence compared to lexicon analysis of the same two words. Future would could focus on classify individual tweets as troll / non-troll tweets or even non-binary degrees of 'troll', for instance, classifying three types of trolls mentioned earlier in the discussion. It would also be interesting to run a latent class analysis on the variables 
-
+In our study we examined two types of models, Logistic regression as well as regression trees which were chosen for interpretability.
 
 
 
