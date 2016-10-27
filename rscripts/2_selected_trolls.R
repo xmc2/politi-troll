@@ -66,7 +66,7 @@ trolls <- function(usernames){
                 }
         }
         
-        #paste("Data was generated from twitter on", tweets_time)
+        paste("Data was generated from twitter on", tweets_time)
         return(db)
 
 }
