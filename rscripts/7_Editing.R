@@ -9,6 +9,11 @@ if(length(new.packages)) install.packages(new.packages)
   
 lapply(list.of.packages, library, character.only = TRUE)
 
+install.packages(
+  'printr',
+  type = 'source',
+  repos = c('http://yihui.name/xran', 'http://cran.rstudio.com')
+)
 
 #### to obtain data we can either re generate
 # source("gettingdata.R")
