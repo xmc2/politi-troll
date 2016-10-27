@@ -1,6 +1,5 @@
 # visuals
-library(ggplot2); library(rpart); library(boot); library(sm); library(lubridate); library(rpart.plot)
-library(e1071); require(dplyr); library(pROC); library(lmtest)
+
 
 source('rscripts/7_Editing.R')
 set.seed(66)
@@ -108,7 +107,6 @@ log1_auc <- roc(log1_pred$troll, log1_pred$prob1)$auc[1]
 plot(roc(log1_pred$troll, log1_pred$prob1))
 # PART 2
 
-require(caret)
 weights2 = ifelse(train$troll == 1,2,1)
 data$badwords
 
