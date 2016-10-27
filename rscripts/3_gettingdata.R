@@ -8,11 +8,11 @@ source("rscripts/2_selected_trolls.R")
 hrc_tweets <- get_those_tweets_meow(sample_size = 150, term = '@hillaryclinton'); hrc_time <- Sys.time()
 djt_tweets <- get_those_tweets_meow(sample_size = 150, term = '@donaldtrump'); djt_time <- Sys.time()
 data <- dplyr::bind_rows(hrc_tweets, djt_tweets)
-write.csv(data, "outputs/data1.csv")
-x <- read.csv("outputs/data1.csv")
+write.csv(data, "outputs/data_api.csv")
+x <- read.csv("outputs/data_api.csv")
 x <- x %>% 
   select(screenName, text1, text2, text3, text4, text5, text6, text7, text8, text9, text10)
-write.csv(x, "outputs/classifyme.csv")
+write.csv(x, "outputs/classifyme_api.csv")
 rm(x)
 # END
 # 
@@ -25,7 +25,7 @@ rm(x)
 # 
 # #####
 
-existing_trolls <- select(read.csv("outputs/selected_trolls.csv"), -X)
+#existing_trolls <- select(read.csv("outputs/selected_trolls.csv"), -X)
 
 
 
