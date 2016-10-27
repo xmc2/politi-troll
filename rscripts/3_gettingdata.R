@@ -12,20 +12,14 @@ write.csv(data, "outputs/data_api.csv")
 x <- read.csv("outputs/data_api.csv")
 x <- x %>% 
   select(screenName, text1, text2, text3, text4, text5, text6, text7, text8, text9, text10)
+x$troll <- ifelse(0 == 0 , 0 , 0)
 write.csv(x, "outputs/classifyme_api.csv")
 rm(x)
-# END
-# 
-# 
-# #####
-# ##### Hand harvested trolls
-# #####
-# #####
-# #####
-# 
-# #####
 
-#existing_trolls <- select(read.csv("outputs/selected_trolls.csv"), -X)
+Classify!
 
-
+read.csv("outputs/classifyme_api.csv") %>%
+  select(screenName, troll) %>%
+  full_join(data) %>%
+  write.csv('outputs/api_data_troll.csv')
 
