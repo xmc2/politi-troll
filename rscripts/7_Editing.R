@@ -1,4 +1,10 @@
-library(readr); library(stringr); library(dplyr); library(tidytext)
+list.of.packages <- c("ggplot2", "Rcpp", "readr", "stringr", "dplyr", "tidytext",
+                     "rpart", "boot", "sm", "lubridate", "rpart.plot", "dplyr", "pROC", 
+                     "lmtest", "caret", "e1071")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+
 #### to obtain data we can either re generate
 # source("gettingdata.R")
 #### or we can collect what we have already produced
