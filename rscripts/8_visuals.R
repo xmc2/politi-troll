@@ -1,17 +1,22 @@
 # visuals
 library(ggplot2); library(rpart); library(boot); library(sm); library(lubridate); library(rpart.plot)
-library(e1071); require(dplyr); library(pROC)
+library(e1071); require(dplyr); library(pROC); library(lmtest)
 
-source('rscripts/7_editing.R')
-set.seed(10)
+source('rscripts/7_Editing.R')
+set.seed(66)
 
 data$followersCount0 <- data$followersCount / 10
 data$listedCount0 <- data$listedCount / 10
 data$friendsCount0 <- data$friendsCount / 10
 
+data$followersCount00 <- data$followersCount / 100
+data$listedCount00 <- data$listedCount / 100
+data$friendsCount00 <- data$friendsCount / 100
+
 ### define a training and a testing set
 test <- sample_frac(data,0.20)
 train <- anti_join(data,test)
+
 ####
 # hist(data[data$troll == T, ]$t_sent, col="blue", xlab="Troll", ylab="sentiment score",
 #         main="most recent tweet")
@@ -66,7 +71,8 @@ plotcp(pfit)
 
 
 # plot the pruned tree 
-rpart.plot(pfit, type = 3,uniform=TRUE, 
+par(mfrow=c(1,1)) 
+tree_plot <- rpart.plot(pfit, type = 3,uniform=TRUE, 
       main="Pruned Classification Tree for Troll", digits=2, tweak =1.5)
 # pfit$cptable
 
@@ -80,6 +86,7 @@ tree_sens <- mean(tree_pred[tree_pred$troll == 1,]$troll == tree_pred[tree_pred$
 tree_spec <- mean(tree_pred[tree_pred$troll == 0,]$troll == tree_pred[tree_pred$troll == 0,]$predicted)
 
 tree_auc <- roc(tree_pred$troll, tree_pred$prob1)$auc[1]
+tree_err_rate; tree_sens; tree_spec;tree_auc
 
 ###
 #### LOGISTIC REGRESSION 
@@ -103,10 +110,10 @@ plot(roc(log1_pred$troll, log1_pred$prob1))
 
 require(caret)
 weights2 = ifelse(train$troll == 1,2,1)
+data$badwords
 
-
-log2 <- train(as.factor(troll)~t_sent+followersCount0+listedCount0+user_m+imagedefault+
-                      friendsCount0, 
+log2 <- train(as.factor(troll)~t_sent+followersCount00+listedCount00+user_m+imagedefault+
+                      friendsCount00+badwords+user_w, 
       data=train,
       weights=weights2,
       method="glm", 
@@ -124,6 +131,44 @@ log2_err_rate <- 1 - mean(log2_pred$predicted == log2_pred$troll)
 log2_sens <- mean(log2_pred[log2_pred$troll == 1,]$troll == log2_pred[log2_pred$troll == 1,]$predicted)
 log2_spec <- mean(log2_pred[log2_pred$troll == 0,]$troll == log2_pred[log2_pred$troll == 0,]$predicted)
 log2_auc <- roc(log2_pred$troll, predict(log2, test, type = "prob")[,2])$auc[1]
+
+
+
+log2_residuals <- predict(log2, train, type="prob")[,2] %>% 
+        cbind(train$troll) %>% as.data.frame()
+colnames(log2_residuals) <- c("prob", "troll")
+
+log2_residuals <- log2_residuals %>%
+        as.data.frame() %>% 
+        mutate(residual = troll - prob) %>%
+        arrange(prob)
+
+
+plot(log2_residuals$prob, log2_residuals$residual,
+     xlab="Predicted Probabilities", ylab = "Residuals",
+     pch = 19, col = rgb(0.5,0,0,0.35))
+loess_fit <- loess(log2_residuals$residual ~ log2_residuals$prob)
+lines(log2_residuals$prob, predict(loess_fit), col = "steelblue", type='l', pch=19, lwd=5)
+
+summary(log2)
+
+
+plot(logistic_fit1)[1]
+names(log2)
+summary(log2)$deviance # on 218 df
+summary(log2)$df.residual
+summary(logistic_fit1)$deviance
+summary(logistic_fit1)$df.residual
+
+1 - pchisq(summary(logistic_fit1)$deviance - summary(log2)$deviance, 
+       summary(logistic_fit1)$df.residual - summary(log2)$df.residual)
+
+
+
+str(summary(log2))
+
+log2$deviance
+
 
 ###
 #### SVM - removed
