@@ -1,16 +1,16 @@
 # hand harvesting trolls
 require(twitteR); require(dplyr); require(tidytext); require(readr)
-source("rscripts/hidden.R")
-source("rscripts/get_tweets_now_func.R")
-source("rscripts/selected_trolls.R")
 
-hand_trolls <- c()
+source("rscripts/1_get_tweets_now_func.R")
+source("rscripts/2_selected_trolls.R")
+
+hand_trolls <- c() # put troll usernames here to make a character vector!!!
 
 # this is all of the already collected data
-data <- read_csv('data/data1010.csv') %>%
+data <- read_csv('data/api_data_troll.csv') %>%
         mutate(screenName = tolower(screenName))
 
-# we will remove duplicates from the dataset
+# we will remove duplicates fr om the dataset
 hand_trolls <- hand_trolls %>%
         tolower() %>%
         as.data.frame() %>%
@@ -32,15 +32,17 @@ hand_trolls_data <- trolls(user_names)
 hand_trolls_data %>%
         select(screenName, text1, text2, text3, text4, text5, text6, text7, text8, 
         text9, text10) %>%
-        write_csv('outputs/classify1013.csv')
+        write_csv('outputs/classifyme_handtroll.csv')
 
-classified_trolls <- read_csv('outputs/classify1013.csv') %>%
+## CLASSIFY THESE
+
+classified_trolls <- read_csv('outputs/classifyme_handtroll.csv') %>%
         select(screenName, troll)
 
 hand_trolls_classified <- hand_trolls_data %>% 
         full_join(classified_trolls)
         
 data <- data %>%
-        rbind(hand_trolls_classified)
+        rbind(hand_trolls_classified) # this is our completed troll 'database'
 
-write_csv(data, 'data/data1013.csv')
+write_csv(data, 'data/data.csv')
