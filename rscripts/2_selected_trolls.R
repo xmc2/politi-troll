@@ -1,5 +1,5 @@
 # Existing trolls to DF
-
+source("rscripts/0_hidden.R")
 trolls <- function(usernames){
         
         # lets get info from these users 
