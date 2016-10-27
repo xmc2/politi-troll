@@ -6,9 +6,6 @@ output: pdf_document
 subtitle: "Identifying political trolls on Twitter"
 ---
 
-```{r load_packages_data, warning=F, echo=FALSE, message=FALSE, cache=T, results='hide',include=FALSE, error=F}
-library(readr); library(sm);library(ggplot2); library(rpart); library(boot); library(sm); library(lubridate); library(rpart.plot); library(rpart); library(knitr); library(caret)
-```
 
 ```{r setwd_source, warning=F, echo=FALSE, message=FALSE, results='hide', include=FALSE, error=F, dependson='rscripts/8_visuals.r'}
 
