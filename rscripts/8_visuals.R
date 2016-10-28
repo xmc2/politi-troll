@@ -13,6 +13,9 @@ data$friendsCount00 <- data$friendsCount / 100
 
 data$english <- grepl("en",data$lang)
 
+data$days_2015 <- (seconds(data$created) - 1420088400) / 60 / 60 / 24
+
+data$AFINN_sent <- data$t_sent
 ### define a training and a testing set
 set.seed(15)
 test <- sample_frac(data,0.20)
@@ -54,7 +57,7 @@ train <- anti_join(data,test)
 ###
 weights = ifelse(train$troll == 1,(1-mean(train$troll))/mean(train$troll),1)
 
-fit <- rpart(troll~t_sent+created+followersCount+listedCount+statusesCount+favoritesCount+friendsCount+
+fit <- rpart(troll~t_sent+days_2015+followersCount+listedCount+statusesCount+favoritesCount+friendsCount+
                      english+bdword+user_w+user_a+user_m + angry + imagedefault, 
              method = "class",
              weights=weights,
@@ -62,6 +65,7 @@ fit <- rpart(troll~t_sent+created+followersCount+listedCount+statusesCount+favor
 rpart.plot(fit)
 
 ###
+set.seed(1)
 pfit <- prune(fit, cp=fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"])
 # printcp(pfit)
 plotcp(pfit)

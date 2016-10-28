@@ -1,7 +1,7 @@
 list.of.packages <- c("ggplot2", "Rcpp", "stringr", "dplyr", "tidytext",
                      "rpart", "boot", "sm", "lubridate", "rpart.plot", "pROC", 
                      "lmtest", "caret", "e1071", "knitr", "boot", "devtools",
-                     "base", "readr", "glmnet")
+                     "base", "readr", "glmnet", "lubridate")
 #readr
 #devtools
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
