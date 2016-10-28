@@ -57,7 +57,7 @@ train <- anti_join(data,test)
 ###
 weights = ifelse(train$troll == 1,(1-mean(train$troll))/mean(train$troll),1)
 
-fit <- rpart(troll~t_sent+days_2015+followersCount+listedCount+statusesCount+favoritesCount+friendsCount+
+fit <- rpart(troll~AFINN_sent+days_2015+followersCount+listedCount+statusesCount+favoritesCount+friendsCount+
                      english+bdword+user_w+user_a+user_m + angry + imagedefault, 
              method = "class",
              weights=weights,
@@ -116,13 +116,11 @@ plot(roc(log1_pred$troll, log1_pred$prob1))
 weights2 = ifelse(train$troll == 1,2,1)
 data$badwords
 
-log2 <- train(as.factor(troll)~t_sent+followersCount00+listedCount00+user_m+imagedefault+
+log2 <- glm(troll~t_sent+followersCount00+listedCount00+user_m+imagedefault+
                       friendsCount00+badwords+user_w, 
       data=train,
-      weights=weights2,
-      method="glm", 
-      family="binomial",
-      trControl = trainControl(method = "cv")
+      weights=weights,
+      family = quasibinomial(link = "logit")
 )
 
 summary(log2)
@@ -134,11 +132,11 @@ colnames(log2_pred) <- c("predicted", "troll")
 log2_err_rate <- 1 - mean(log2_pred$predicted == log2_pred$troll)
 log2_sens <- mean(log2_pred[log2_pred$troll == 1,]$troll == log2_pred[log2_pred$troll == 1,]$predicted)
 log2_spec <- mean(log2_pred[log2_pred$troll == 0,]$troll == log2_pred[log2_pred$troll == 0,]$predicted)
-log2_auc <- roc(log2_pred$troll, predict(log2, test, type = "prob")[,2])$auc[1]
+log2_auc <- roc(log2_pred$troll, predict(log2, test, type = "response"))$auc[1]
 
 
 
-log2_residuals <- predict(log2, train, type="prob")[,2] %>% 
+log2_residuals <- predict(log2, train, type="response") %>% 
         cbind(train$troll) %>% as.data.frame()
 colnames(log2_residuals) <- c("prob", "troll")
 

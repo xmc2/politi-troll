@@ -218,3 +218,4 @@ write_csv(data, "data/dataE.csv")
 
 rm(AFINN, bad, nrc, nrc_sent, tweet_dat, tweet_dat2, tweet_sentiment, tweet_words,
    badwords)
+

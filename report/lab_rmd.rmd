@@ -92,7 +92,9 @@ rpart.plot(pfit, type = 3, uniform=TRUE,
      main="Pruned Classification Tree for Trolls", digits=2, tweak =1)
 ```
   
-  __Figure 2__ Pruned regression tree visualization. Nodes indicate, prediction (0 or 1 for troll status), mean troll value, and percentage of data contained in each node. Variables present in the pruned classification tree include: 
+  __Figure 2__ Pruned regression tree visualization. Nodes indicate, prediction (0 or 1 for troll status), mean troll value, and percentage of data contained in each node. Variables present in the pruned classification tree include: __AFINN_SENT__ the average sentiment of a users tweets, __days_2015__ - the number of days since 2015 that the account was created, __statusesCount__ - the number of statuses made by a user at time of colelction, __listedCount__ - the number of lists a user of is a part of.
+  
+Consider the great account, @mattcol3. @mattcol3 joined twitter in April 2011, has 1060 tweets, 212 followers, is not on any lists, and has an average sentiment score of 1.7 out of his last 10 tweets. Because the sentiment score is greater than or equal to -0.42 we would follow the classification tree branch to the left from the first split. Because the account was made in april 2011, about -1335 days after January 1st 2016, we would move down to the right. The next split concerns follower counts of less than 5858, because @mattcol3 fits that criteria we will move to the left to the last split. @mattcol3 is not on any lists so we slide to the right and reach our prediction: the classification tree estimates that @mattcol3 is a troll! We see that 5% of our training data fell into that terminal node and about 71% were trolls, you're in good company @mattcol3!
 
 
 
@@ -124,25 +126,23 @@ __Table 2__ Raw error rate, Sensitivity, Specificity, and "AUC" comparison of al
 ### Results
 It was expected that the regression tree would be able to outperform the logistic regression as the relationship between covariates and troll status seem opaque at best and would likely be best modeled with a non-parametric method (table 2). As we saw, the classification tree matched our full logistic model with respect to specificity and AUC and was outperformed with respect to raw error rate in the testing group (Table 2).
 
-We also expected the additional covariates in the full logistic model to increase its viability as a troll predictor (Table 2). This was evident as the error rate dropped  $`r round(log1_err_rate, 3)`$ to $`r round(log2_err_rate, 3)`$, while   sensitivity increase (from $`r round(log1_sens, 3)`$ to $`r round(log2_sens, 3)`$), as well as specificity (from $`r round(log1_spec, 3)`$ to $`r round(log2_spec, 3)`$), and AUC (from $`r round(log1_auc, 3)`$ to $`r round(log2_auc, 3)`$) in the two models (Table 2).
+We also expected the additional covariates in the full logistic model to increase its viability as a troll predictor (Table 2). This was evident as the error rate dropped  $`r round(log1_err_rate, 3)`$ to $`r round(log2_err_rate, 3)`$, while   sensitivity increase (from $`r round(log1_sens, 3)`$ to $`r round(log2_sens, 3)`$), as well as specificity (from $`r round(log1_spec, 3)`$ to $`r round(log2_spec, 3)`$), and AUC (from $`r round(log1_auc, 3)`$ to $`r round(log2_auc, 3)`$) in the two models (Table 2). 
 
 
 Surprisingly, many of the covaraites did not make the final model in the pruned classification tree model. These included the anger score, emoji score, number of individuals they are following etc. This could be because of a lack of relationship between these variables and troll status, or it could be due to the lack of data to identify such nuanced features.
 
+Although not excellent, the results from our models suggest that there are attributes which may allow us to identify trolls and possibly silence them, shortening their troll reign.
+
 
 ### Limitations
-The main limitation of this study was a lack of available data, particularly trolls. Although there were $`r nrow(data)`$ observations there were only $`r sum(data$troll)`$ trolls in our dataset, more would likely allow us to identify additional relationships and interactions between variables and troll status. In addition, there is the possibility for human error as a single person classified all tweets. This error could come from keystroke error or implicit political bias. Political bias could be difficult to identify and overcome where beliefs of what actually occurred could alter whether a statement is either inflammatory or extraneous. A good example of this are statements such as "Bill Clinton is a rapist", which were classified as both inflammatory and extraneous, but to an individual whom believes that the statement is true, would likely not view it as extraneous as it is simply stating the truth. 
+The main limitation of this study was a lack of available data, particularly trolls. Although there were $`r nrow(data)`$ observations there were only $`r sum(data$troll)`$ trolls in our dataset, more would likely allow us to identify additional relationships and interactions between variables and troll status. In addition, there is the possibility for human error as a single person classified all tweets (as opposed to double checking). This error could come from keystroke error or implicit political bias. Political bias could be difficult to identify and can occur when beliefs of what actually occurred alter whether a statement is inflammatory or extraneous. For instance, roumors circulating of sexual assaults commited by Bill Clinton may be considered extraneous by those whom view it as a falsehood while those whom believe it to have occured could consider talk of it to be propper.
 
 ### Reproducibility
-Because of the subjective nature of troll classifcation this project will not be completely reproducible. There are several reproducibility issues ti i n this project inlucding username and tweet collection as well as troll classificaiton. 
-Username colleciton was mostly conducted in an automated fashion, however, although API searches can be rerun at any time (using time constraints), Twitter is notorious for tweet deletion, editing, and even usernames changing. With this in mind, running the same commands will likely not replicate the response. In addition, for the roughly 45% of the usernames were collected by browsing major presidential candidates for replies, and recording their usernames will be subject to the same sorts of issues as the API, etc. ___ADDMOREHERE__
-
+Because of the subjective nature of troll classifcation this project will not be completely reproducible. In addition to the classification issues, there are also potential additional difficulties inlucding username and tweet collection.
+Username colleciton was mostly conducted in an automated fashion and although API searches can be rerun at any time (using time constraints), Twitter users are notorious for tweet deletion, editing, and even username swapping. With this in mind, running the same commands will likely not replicate the response exactly. In addition, for the roughly 45% of the usernames were collected by browsing major presidential candidates for replies, and recording their usernames cannot be replicated exactly as users may delete accounts or replies at any time and was, in addition, not done in an automated fashion. 
 
 ### Generalization
-It is plausible that these models could generalize to other spaces within twitter or even outside of the social media site where trolling is a serious issue. However, the model relies heavily on non-text covariates such as friends, dates, and followers and applying this model to,  an anonymous online form would likely be less effective, as this user data would be missing.  the models here may not generalize to  sites where the long posts are common as tweets are capped at 140 characters, however potentially averaging sentiments or bad words (ie. average sentiment per 100 characters or 10 words) may possibly be effective.
-
-### Reproducibility
-* with this project the tradeoff between reproducibility and both generalizability as well as relevance became apparent very quickly. "Did each user have 10 total tweets?  How did you define inflammatory or extraneous?  A bag of words?  Your judgment?" -John
+It is plausible that these models could generalize to other spaces within twitter or even outside of this particular social media site where trolling is a serious issue. However, the model relies heavily on non-text covariates such as friends, dates, and followers and applying this model to, for example, an anonymous online form would likely be less effective, as this user data would be missing.  The models here would likely not be effective on sites where the long posts are common, as tweets are capped at 140 characters, however potentially averaging sentiments or bad words (ie. average sentiment per 100 characters or 10 words) may possibly be effective.
 
 
 ### Future Work
@@ -196,9 +196,9 @@ Wickham, H., Hester, J., & Francois, R. (2016). R package readr: Read Tabular Da
 
 
 \newpage
+# Appendix / Supplement
 
-
-Exploratory Graphs
+###Exploratory Graphs
 
 
 ```{r explore_plots, warning=F, echo=FALSE, message=FALSE, cache=T, dependson = "load_packages_data"}
@@ -238,12 +238,13 @@ __Figure A1__ Smoothed density plots of common twitter metrics in both troll and
 
 After models were fit, they were assessed 
 
+```{r}
 plot(logistic_fit1)
+plot(log2)
 
 
 
-class(log2)
-
+```
 
 
 
