@@ -1,11 +1,12 @@
-list.of.packages <- c("ggplot2", "Rcpp", "readr", "stringr", "dplyr", "tidytext",
-                     "rpart", "boot", "sm", "lubridate", "rpart.plot", "dplyr", "pROC", 
+list.of.packages <- c("ggplot2", "Rcpp", "stringr", "dplyr", "tidytext",
+                     "rpart", "boot", "sm", "lubridate", "rpart.plot", "pROC", 
                      "lmtest", "caret", "e1071", "knitr", "boot", "devtools",
-                     "base", "readr")
-  
+                     "base", "readr", "glmnet")
+#readr
+#devtools
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages,repos = 'http://cran.us.r-project.org')
-  
+
   
 lapply(list.of.packages, library, character.only = TRUE)
 

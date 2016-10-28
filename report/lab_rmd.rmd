@@ -3,14 +3,15 @@ title: "Politi-troll"
 author: "Matt Cole"
 date: "October 25, 2016"
 output: pdf_document
-subtitle: "Identifying political trolls on Twitter"
+subtitle: Identifying political trolls on Twitter
 ---
 
 ```{r setwd_source, warning=F, echo=FALSE, message=FALSE, results='hide', include=FALSE, error=F, dependson='rscripts/8_visuals.r'}
 
 setwd(file.path(".."))
-source('rscripts/8_visuals.r') # also runs script 7
+source('rscripts/8_visuals.R') # also runs script 7
 #data <- read_csv("data/MC_processed_data.csv")
+
 ```
 
 ## Introduction
@@ -90,9 +91,9 @@ kable(x, digits = 4, caption = 'Logistic regression coefficients')
   
 __Table 1__ exponentiated Logistic regression coefficients. 
 
-Here we see that for each one unit increase in AFINN sentiment score, the odds of a user decreases by a factor of `r round(x[2,1],2)` (95% CI: `r round(x[2,2],2)` , `r round(x[2,3],2) `), while the number of followers and friends increases the changes the odds of being a troll by `r round(x[3,1],2)` (95% CI: `r round(x[3,2],2)` , `r round(x[3,3],2) `) and `r round(x[7,1],2)` (95% CI: `r round(x[7,2],2)` , `r round(x[7,3],2) `) respectivly. Users whom access Twitter via mobile devices and those using through desktop applications were both associated with a decrease in likelihood of being a troll, with mobile users and desktop users associated with a change in odds of trollhood by `r round(x[5,1],2)` (95% CI: `r round(x[5,2],2)` , `r round(x[5,3],2) `) and `r round(x[9,1],2)` (95% CI: `r round(x[9,2],2)` , `r round(x[9,3],2) `). Presence of a default image (sometimes refered to as the beginer's egg) is associated with an increase in odds of being a troll of `r round(x[6,1],2)` (95% CI: `r round(x[6,2],2)` , `r round(x[6,3],2) `) while for each unit increase in average 'bad word' per tweet odds of trolls increased by a factor of `r round(x[8,1],2)` (95% CI: `r round(x[8,2],2)` , `r round(x[8,3],2) `)
+Here we see that for each one unit increase in AFINN sentiment score, the odds of a user decreases by a factor of $`r round(x[2,1],2)`$ (95% CI: $`r round(x[2,2],2)`$ , $`r round(x[2,3],2) `$), while the number of followers and friends increases the changes the odds of being a troll by $`r round(x[3,1],2)`$ (95% CI: $`r round(x[3,2],2)`$ , $`r round(x[3,3],2) `$) and $`r round(x[7,1],2)`$ (95% CI: $`r round(x[7,2],2)`$ , $`r round(x[7,3],2) `$) respectivly. Users whom access Twitter via mobile devices and those using through desktop applications were both associated with a decrease in likelihood of being a troll, with mobile users and desktop users associated with a change in odds of trollhood by $`r round(x[5,1],2)`$ (95% CI: $`r round(x[5,2],2)`$ , $`r round(x[5,3],2) `$) and $`r round(x[9,1],2)`$ (95% CI: $`r round(x[9,2],2)`$ , $`r round(x[9,3],2) `$). Presence of a default image (sometimes refered to as the beginer's egg) is associated with an increase in odds of being a troll of $`r round(x[6,1],2)`$ (95% CI: $`r round(x[6,2],2)`$ , $`r round(x[6,3],2) `$) while for each unit increase in average 'bad word' per tweet odds of trolls increased by a factor of $`r round(x[8,1],2)`$ (95% CI: $`r round(x[8,2],2)`$ , $`r round(x[8,3],2) `$)
 
-For our classification tree, We found a CV prediction error rate of `r round(tree_err_rate,3)`, sensitivity of `r round(tree_sens,3)`, specificity of `r round(tree_spec, 3)`, and a AUC of `r round(tree_auc, 3)`  in the testing group (figure 1, table 2). This showed a considerably higher degree of accuracy compared with the logistic regression models that were produced. 
+For our classification tree, We found a CV prediction error rate of $`r round(tree_err_rate,3)`$, sensitivity of $`r round(tree_sens,3)`$, specificity of $`r round(tree_spec, 3)`$, and a AUC of $`r round(tree_auc, 3)`$  in the testing group (figure 1, table 2). This showed a considerably higher degree of accuracy compared with the logistic regression models that were produced. 
 
 ```{r echo=FALSE, message=FALSE}
 library(rpart.plot)
@@ -111,7 +112,7 @@ rpart.plot(pfit, type = 3, uniform=TRUE,
 
 
 
-```{r, cache=T, echo=F}
+```{r echo=F}
 require(knitr)
 x1<-c(log1_err_rate, log1_sens, log1_spec, log1_auc)
 x2<-c(log2_err_rate, log2_sens, log2_spec,log2_auc)
@@ -133,7 +134,7 @@ __Table 2__ raw error rate, Sensitivity, Specificity, and "AUC" comparison of al
 ### Results
 It was expected that the regression tree would be able to outperform the logistic regression as the relationship between covariates and troll status seem opaque at best and would likely be best modeled with a non-parametric method (table 2). As we saw, the classification tree was in fact able to outperform the logistic regression models with respect to error rate, sensitivity and AUC however, the specificity results were abysmal with a value of 0.55, suggesting that our model was barely better than flipping a coin for classification of non-trolls, and much worse in this regard than either of the logistic regression models (table 2).
 
-logistic regression  `r round(log1_err_rate, 3)` to `r round(log2_err_rate, 3)`, while increasing the sensitivity (from `r round(log1_sens, 3)` to `r round(log2_sens, 3)`), specificity (from `r round(log1_spec, 3)` to `r round(log2_spec, 3)`), and the AUC (from `r round(log1_auc, 3)` to `r round(log2_auc, 3)`).
+logistic regression  $`r round(log1_err_rate, 3)`$ to $`r round(log2_err_rate, 3)`$, while increasing the sensitivity (from $`r round(log1_sens, 3)`$ to $`r round(log2_sens, 3)`$), specificity (from $`r round(log1_spec, 3)`$ to $`r round(log2_spec, 3)`$), and the AUC (from $`r round(log1_auc, 3)`$ to $`r round(log2_auc, 3)`$).
 
 This study did shed light on a strange phenomena of different classes of trolls. From our anecdotal experience, there seemed to be three types or classes of twitter trolls.
   
@@ -147,7 +148,7 @@ Surprisingly, many of the covaraites did not make the final model in either the 
 
 
 ### Limitations
-The main limitation of this study was a lack of available data, particularly trolls. Although there were `r nrow(data)` observations there were only `r sum(data$troll)` trolls in our dataset, more would likely allow us to identify additional relationships and interactions between variables and troll status. In addition, there is the possibility for human error as a single person classified all tweets. This error could come from keystroke error or implicit political bias. Political bias could be difficult to identify and overcome where beliefs of what actually occurred could alter whether a statement is either inflammatory or extraneous. A good example of this are statements such as "Bill Clinton is a rapist", which were classified as both inflammatory and extraneous, but to an individual whom believes that the statement is true, would likely not view it as extraneous as it is simply stating the truth. 
+The main limitation of this study was a lack of available data, particularly trolls. Although there were $`r nrow(data)`$ observations there were only $`r sum(data$troll)`$ trolls in our dataset, more would likely allow us to identify additional relationships and interactions between variables and troll status. In addition, there is the possibility for human error as a single person classified all tweets. This error could come from keystroke error or implicit political bias. Political bias could be difficult to identify and overcome where beliefs of what actually occurred could alter whether a statement is either inflammatory or extraneous. A good example of this are statements such as "Bill Clinton is a rapist", which were classified as both inflammatory and extraneous, but to an individual whom believes that the statement is true, would likely not view it as extraneous as it is simply stating the truth. 
 
 ### Reproducibility
 Because of the subjective nature of troll classifcation this proje g will nto be completely reproducible. There are several reproducibility issues ti i n this project inlucding username and tweet collection as well as troll classificaiton. 

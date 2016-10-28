@@ -1,8 +1,7 @@
 # visuals
 
-
+set.seed(100)
 source('rscripts/7_Editing.R')
-set.seed(66)
 
 data$followersCount0 <- data$followersCount / 10
 data$listedCount0 <- data$listedCount / 10
@@ -12,7 +11,10 @@ data$followersCount00 <- data$followersCount / 100
 data$listedCount00 <- data$listedCount / 100
 data$friendsCount00 <- data$friendsCount / 100
 
+data$english <- grepl("en",data$lang)
+
 ### define a training and a testing set
+set.seed(15)
 test <- sample_frac(data,0.20)
 train <- anti_join(data,test)
 
@@ -53,7 +55,7 @@ train <- anti_join(data,test)
 weights = ifelse(train$troll == 1,(1-mean(train$troll))/mean(train$troll),1)
 
 fit <- rpart(troll~t_sent+created+followersCount+listedCount+statusesCount+favoritesCount+friendsCount+
-                     lang+bdword+user_w+user_a+user_m + angry + imagedefault, 
+                     english+bdword+user_w+user_a+user_m + angry + imagedefault, 
              method = "class",
              weights=weights,
              data=train)
@@ -151,7 +153,8 @@ lines(log2_residuals$prob, predict(loess_fit), col = "steelblue", type='l', pch=
 summary(log2)
 
 
-plot(logistic_fit1)[1]
+
+#plot(logistic_fit1)[1]
 names(log2)
 summary(log2)$deviance # on 218 df
 summary(log2)$df.residual
