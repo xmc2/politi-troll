@@ -1,7 +1,7 @@
 ---
 title: "Politi-troll"
 author: "Matt Cole"
-date: "October 25, 2016"
+date: "Due: October 28, 2016"
 output: pdf_document
 subtitle: Identifying political trolls on Twitter
 ---
@@ -92,13 +92,9 @@ rpart.plot(pfit, type = 3, uniform=TRUE,
      main="Pruned Classification Tree for Trolls", digits=2, tweak =1)
 ```
   
-  __Figure 2__ Pruned regression tree visualization. Nodes indicate, prediction (0 or 1 for troll status), mean troll value, and percentage of data contained in each node. Variables present in the pruned classification tree include: __AFINN_SENT__ the average sentiment of a users tweets, __days_2015__ - the number of days since 2015 that the account was created, __statusesCount__ - the number of statuses made by a user at time of colelction, __listedCount__ - the number of lists a user of is a part of.
+  __Figure 2__ Pruned regression tree visualization. Nodes indicate prediction (0 or 1 for troll status), fraction of trolls in node (training set), and percentage of data contained in each node. Variables present in the pruned classification tree include: __AFINN_SENT__ the average sentiment of a users tweets, __days_2015__ - the number of days since 2015 that the account was created, __statusesCount__ - the number of statuses made by a user at time of colelction, __listedCount__ - the number of lists a user of is a part of.
   
 Consider the great account, @mattcol3. @mattcol3 joined twitter in April 2011, has 1060 tweets, 212 followers, is not on any lists, and has an average sentiment score of 1.7 out of his last 10 tweets. Because the sentiment score is greater than or equal to -0.42 we would follow the classification tree branch to the left from the first split. Because the account was made in april 2011, about -1335 days after January 1st 2016, we would move down to the right. The next split concerns follower counts of less than 5858, because @mattcol3 fits that criteria we will move to the left to the last split. @mattcol3 is not on any lists so we slide to the right and reach our prediction: the classification tree estimates that @mattcol3 is a troll! We see that 5% of our training data fell into that terminal node and about 71% were trolls, you're in good company @mattcol3!
-
-
-
-
 
 
 
@@ -198,6 +194,9 @@ Wickham, H., Hester, J., & Francois, R. (2016). R package readr: Read Tabular Da
 \newpage
 # Appendix / Supplement
 
+## EDA
+  Exploratory data analysis revealed that no single factor showed good separation, between trolls and non trolls (appendix, EDA). Several covariates expected to have a strong relationship with troll status such as number of followers did not appear to show such in the 2 dimensional plots (appendix, EDA). However, others such as AFINN sentiment score did show a possible relationship, although weak at best (appendix, EDA).
+
 ###Exploratory Graphs
 
 
@@ -227,24 +226,29 @@ legend('topright', c("Troll", "Non-troll") ,
    lty=1, col=c('red', 'blue'), bty='n', cex=.75)
 
 ```
-
-
-
 __Figure A1__ Smoothed density plots of common twitter metrics in both troll and non-troll groups. Trolls are denoted by the red line while non-trolls are denoted by the blue line. Distribution of AFINN sentiment score and year of account creation appear to potentially be different in the two groups while there is no noticeable difference in follower or status count.
 
 
-## EDA
-  Exploratory data analysis revealed that no single factor showed good separation, between trolls and non trolls (appendix, EDA). Several covariates expected to have a strong relationship with troll status such as number of followers did not appear to show such in the 2 dimensional plots (appendix, EDA). However, others such as AFINN sentiment score did show a possible relationship, although weak at best (appendix, EDA).
 
-After models were fit, they were assessed 
 
-```{r}
+After models were fit, diagnostics were run to assess model fit. Interestingly, neither model showed a consistent residual over all predicted values. the simple logistic model showed a nearly monotonically increasing expected value of the residual as the predicted value increased while the 'full' logistic regression, possibly due to some extreeme predicted values, also showed non-zero expected residual values across the most common (-5,5) predicted logits. 
+
+```{r echo=F}
+par(mfrow=c(2, 2))
 plot(logistic_fit1)
-plot(log2)
-
-
-
 ```
+__Figure A2__ Diagnostic plots for the simple logistic regression.
+
+
+```{r echo=F}
+par(mfrow=c(2, 2))
+plot(log2)
+```
+__Figure A3__ Diagnostic plots for the multiple logistic regression.
+
+
+
+
 
 
 
@@ -262,3 +266,6 @@ This study did shed light on a strange phenomena of different classes of trolls.
 * bots: usually newly created, low tweet/follower/friend count which seem to spew politically charged propaganda.
   
 * troll/fan pages: these accounts seem to be semi-autonomous as they respond to political figures (@therealdonaldtrmp, @hillaryclinton) almost instantaneously while also being able to respond to certain accounts in a thought out manner. These accounts have many tweets, were created long ago and have many followers. In fact, Fortune, POLITICO and the New York Magazine all have run stories of these 'bot armies'.
+
+
+ 

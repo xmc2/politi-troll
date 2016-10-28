@@ -18,3 +18,7 @@ knitr
 pROC
 lattice
 caret
+Rcpp
+zoo
+lmtest
+devtools
